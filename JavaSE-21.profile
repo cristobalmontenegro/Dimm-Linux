@@ -3,7 +3,7 @@
 osgi.java.profile.name=JavaSE-21
 osgi.java.profile.version=21.0
 
-org.osgi.framework.executionenvironment=OSGi/Minimum-1.0,OSGi/Minimum-1.1,OSGi/Minimum-1.2,JavaSE-1.6,JavaSE-1.7,JavaSE-1.8,JavaSE-9,JavaSE-10,JavaSE-11,JavaSE-12,JavaSE-13,JavaSE-14,JavaSE-15,JavaSE-16,JavaSE-17,JavaSE-18,JavaSE-19,JavaSE-20,JavaSE-21
+org.osgi.framework.executionenvironment=OSGi/Minimum-1.0,OSGi/Minimum-1.1,OSGi/Minimum-1.2,J2SE-1.3,J2SE-1.4,J2SE-1.5,JavaSE-1.0,JavaSE-1.1,JavaSE-1.2,JavaSE-1.3,JavaSE-1.4,JavaSE-1.5,JavaSE-1.6,JavaSE-1.7,JavaSE-1.8,JavaSE-9,JavaSE-10,JavaSE-11,JavaSE-12,JavaSE-13,JavaSE-14,JavaSE-15,JavaSE-16,JavaSE-17,JavaSE-18,JavaSE-19,JavaSE-20,JavaSE-21,CDC-1.0/Foundation-1.0,CDC-1.1/Foundation-1.1
 
 # All system packages (from JDK 21)
 org.osgi.framework.system.packages=\
