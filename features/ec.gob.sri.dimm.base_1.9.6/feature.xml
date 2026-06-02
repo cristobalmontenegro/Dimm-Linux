@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="ec.gob.sri.dimm.base"
+      label="Componentes Base para Anexos DIMM"
+      version="1.9.6"
+      provider-name="Servicio de Rentas Internas"
+      plugin="ec.gov.sri.dimm.principal">
+
+   <description url="http://www.sri.gob.ec">
+      Contiene componentes básicos para uso de las características de anexos.
+   </description>
+
+   <copyright url="http://www.sri.gob.ec">
+      Servicio de Rentas Internas, 2012
+   </copyright>
+
+   <license url="http://www.sri.gob.ec">
+      Este programa es un software de libre distribución, que puede ser copiado y distribuido bajo los términos de la Licencia LESSER GENERAL PUBLIC LICENCE (LGPL) de acuerdo con la publicada por la Free Software Foundation, versión 3 o cualquier versión posterior.
+
+Este programa se distribuye con el interés de ser útil a sus usuarios, pero NO TIENE GARANTÍA ALGUNA, EXPLÍCITA O IMPLÍCITA, COMERCIAL O DE ATENCIÓN A UNA DETERMINADA FINALIDAD. Consulte la licencia LGPL para mayores detalles.
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.equinox.common" version="3.2.0" match="compatible"/>
+      <import plugin="com.ibm.icu"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.swt" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.jface" version="3.2.0" match="compatible"/>
+      <import plugin="ec.gov.sri.dimm.core"/>
+   </requires>
+
+   <plugin
+         id="ec.gob.sri.dimm.api"
+         download-size="0"
+         install-size="0"
+         version="1.9.3"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.core.databinding"
+         download-size="0"
+         install-size="0"
+         version="1.4.0.I20110111-0800"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.core.databinding.beans"
+         download-size="0"
+         install-size="0"
+         version="1.2.100.I20100824-0800"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.core.databinding.observable"
+         download-size="0"
+         install-size="0"
+         version="1.4.0.I20110222-0800"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.core.databinding.property"
+         download-size="0"
+         install-size="0"
+         version="1.4.0.I20110222-0800"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jface.databinding"
+         download-size="0"
+         install-size="0"
+         version="1.5.0.I20100907-0800"
+         unpack="false"/>
+
+   <plugin
+         id="ec.gob.sri.dimm.data"
+         download-size="0"
+         install-size="0"
+         version="1.18.0"
+         unpack="false"/>
+
+</feature>

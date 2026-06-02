@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config date="1780362209362" transient="false" version="3.0">
+<site enabled="true" policy="USER-EXCLUDE" updateable="true" url="platform:/base/">
+<feature id="ec.gov.sri.dimm.feature.core" plugin-identifier="ec.gov.sri.dimm.principal" url="features/ec.gov.sri.dimm.feature.core_1.0.1/" version="1.0.1">
+</feature>
+<feature id="ec.gob.sri.dimm.base" plugin-identifier="ec.gov.sri.dimm.principal" url="features/ec.gob.sri.dimm.base_1.9.6/" version="1.9.6">
+</feature>
+<feature id="ec.gob.sri.dimm.ats" plugin-identifier="ec.gov.sri.dimm.principal" url="features/ec.gob.sri.dimm.ats_1.15.0/" version="1.15.0">
+</feature>
+<feature id="org.eclipse.rcp" plugin-version="3.2.0.v20070612" url="features/org.eclipse.rcp_3.3.0.v20070607-8y8eE8NEbsN3X_fjWS8HPNG/" version="3.3.0.v20070607-8y8eE8NEbsN3X_fjWS8HPNG">
+</feature>
+</site>
+</config>

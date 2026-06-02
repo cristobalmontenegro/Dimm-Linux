@@ -1,0 +1,8 @@
+workspace/
+.metadata/
+*.log
+hs_err_pid*
+core.*
+*.hprof
+derby.log
+configuration/org.eclipse.osgi/

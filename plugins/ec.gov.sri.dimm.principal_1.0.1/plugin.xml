@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="ec.gov.sri.dimm.principal.DimmApplication">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="ec.gov.sri.dimm.principal.Perspective"
+            fixed="false"
+            icon="icons/icono.jpg"
+            id="ec.gov.sri.dimm.principal.perspective"
+            name="DIMM Perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.eclipse.ui.file.exit"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+X">
+      </key>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="ec.gov.sri.dimm.principal.application"
+            name="DIMM">
+         <property
+               name="aboutText"
+               value="Declaración de Información en Medio Magnético">
+         </property>
+         <property
+               name="windowImages"
+               value="icons/icono_peq_16.gif,icons/icono_peq_32.gif">
+         </property>
+         <property
+               name="aboutImage"
+               value="icons/icono.jpg">
+         </property>
+         <property
+               name="appName"
+               value="DIMM">
+         </property>
+         <property 
+         		name="preferenceCustomization" 
+         		value="preferences.ini">
+         </property>
+      </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="ec.gov.sri.dimm.principal"
+            name="DIMM">
+      </category>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.ui.resourcePerspective">
+         <view
+               id="ec.gov.sri.dimm.principal.views.SampleView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.TaskList">
+         </view>
+      </perspectiveExtension>
+   </extension>
+	<extension
+    	point="org.eclipse.ui.newWizards">
+    	<category
+      		id="ec.gov.sri.dimm.nuevo"
+        	name="Dimm Nuevo">
+      </category>
+      <category
+            id="ec.gov.sri.dimm.nuevo.anexo"
+            name="Anexos"
+            parentCategory="ec.gov.sri.dimm.nuevo"
+            order="1001">
+      </category>
+      
+      <category
+            id="ec.gov.sri.dimm.nuevo.ruc"
+            name="Otros"
+            parentCategory="ec.gov.sri.dimm.nuevo"
+            order="1002">
+      </category>
+      <wizard
+            category="ec.gov.sri.dimm.nuevo/ec.gov.sri.dimm.nuevo.ruc"
+            class="ec.gov.sri.dimm.principal.wizards.ruc.RucWizard"
+            icon="icons/icono_peq.jpg"
+            id="ec.gov.sri.dimm.principal.wizards.ruc.RucWizard"
+            name="RUC">
+             <description> 
+              Crea un nuevo RUC 
+             </description> 
+      </wizard>
+      
+      <category
+      		id="ec.gov.sri.dimm.editar"
+        	name="Dimm Editar">
+      </category>
+      <category
+            id="ec.gov.sri.dimm.editar.anexo"
+            name="Anexos"
+            parentCategory="ec.gov.sri.dimm.editar"
+            order="1001">
+      </category>
+      
+      <category
+            id="ec.gov.sri.dimm.editar.ruc"
+            name="Otros"
+            parentCategory="ec.gov.sri.dimm.editar"
+            order="1002">
+      </category>
+      <wizard
+            category="ec.gov.sri.dimm.editar/ec.gov.sri.dimm.editar.ruc"
+            class="ec.gov.sri.dimm.principal.wizards.ruc.edit.RucEditWizard"
+            icon="icons/icono_peq.jpg"
+            id="ec.gov.sri.dimm.principal.wizards.ruc.edit.RucEditWizard"
+            name="RUC">
+             <description> 
+              Editar RUC 
+             </description> 
+      </wizard>
+     
+       <category
+      		id="ec.gov.sri.dimm.importar"
+        	name="Dimm Importar">
+      </category>
+      <category
+            id="ec.gov.sri.dimm.importar.anexo"
+            name="Anexos"
+            parentCategory="ec.gov.sri.dimm.importar"
+            order="1001">
+      </category>
+      
+      <category
+            id="ec.gov.sri.dimm.importar.ruc"
+            name="Otros"
+            parentCategory="ec.gov.sri.dimm.importar"
+            order="1002">
+      </category>
+      <!--
+      <wizard
+            category="ec.gov.sri.dimm.importar/ec.gov.sri.dimm.importar.ruc"
+            class="ec.gov.sri.dimm.principal.wizards.ruc.RucWizard"
+            icon="icons/icono_peq.jpg"
+            id="ec.gov.sri.dimm.principal.wizards.ruc.RucWizard"
+            name="RUC">
+             <description> 
+              Importar RUC 
+             </description> 
+      </wizard>
+      -->
+    </extension>
+         
+</plugin>

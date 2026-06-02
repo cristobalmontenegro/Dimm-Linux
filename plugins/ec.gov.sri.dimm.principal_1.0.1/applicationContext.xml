@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans
+    default-autowire="byName">
+ 
+	<bean id="settings"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:dimm.properties" />
+	</bean>
+
+	<bean id="dataSource"
+		class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName"
+			value="org.apache.derby.jdbc.EmbeddedDriver" />
+		<property name="url">
+			<value>jdbc:derby:${db.path}</value>
+		</property>
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="annotatedClasses">
+			<bean class="ec.gov.sri.dimm.principal.util.ListHibernateMapping"/>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=org.hibernate.dialect.DerbyDialect
+				hibernate.show_sql=true
+				hibernate.hbm2ddl.auto=update
+			</value>
+		</property>
+	</bean>
+
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="abstract-tx-bean"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		lazy-init="true">
+		<property name="transactionManager">
+			<ref local="txManager" />
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+
+
+	<!-- Proxy Servicios -->
+	<bean id="servicioContribuyente" parent="abstract-tx-bean"
+		lazy-init="true">
+		<property name="target">
+			<ref local="servicioContribuyenteTarget" />
+		</property>
+	</bean>
+ 
+	<!-- Servicios -->
+	<bean id="servicioContribuyenteTarget"
+		class="ec.gov.sri.dimm.principal.servicios.impl.ServicioContribuyenteImpl" />
+		
+</beans>
+

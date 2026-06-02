@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DIMM Plug-in
+Bundle-SymbolicName: ec.gov.sri.dimm.principal;singleton:=true
+Bundle-Version: 1.0.1
+Bundle-Activator: ec.gov.sri.dimm.principal.DimmActivator
+Bundle-Vendor: Servicio de Rentas Internas
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.text,
+ org.eclipse.ui.forms,
+ org.eclipse.ui.views,
+ org.eclipse.core.resources,
+ org.eclipse.update.ui,
+ org.eclipse.update.configurator,
+ org.eclipse.update.core,
+ org.eclipse.update.scheduler,
+ ec.gov.sri.dimm.hibernate,
+ ec.gov.sri.dimm.spring,
+ ec.gov.sri.dimm.core,
+ org.apache.derby.core
+Export-Package: ec.gov.sri.dimm.principal.factory,
+ ec.gov.sri.dimm.principal.formas,
+ ec.gov.sri.dimm.principal.persistencia,
+ ec.gov.sri.dimm.principal.servicios,
+ ec.gov.sri.dimm.principal.util
+Eclipse-BuddyPolicy: registered
+Eclipse-LazyStart: true
