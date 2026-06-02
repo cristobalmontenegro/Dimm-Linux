@@ -1,89 +1,51 @@
-# DIMM Migration: State & Pending Tasks
+# DIMM - DIMM-Linux Migration State
 
-## Última sesión: 31/05/2026
+## Goal
+Hacer que DIMM (Eclipse 3.3 RCP + plugins SRI) funcione con Java 21 en Linux (GTK).
 
-## Logros
+## Current State (Jun 1 2026) ✅
+- **DIMM arranca** con Java 21 + Equinox launcher
+- **Menú ATS** funciona (Herramientas ATS visible y operativo)
+- **Plugin management** funcional (instalar/desinstalar vía Programa, Agregar/Desinstalar)
+- **Auto-fix de BREE** en dimm.sh — remueve automáticamente EEs incompatibles (CDC, Foundation, J2SE) al arrancar
+- **GitHub**: https://github.com/cristobalmontenegro/Dimm-Linux
 
-- **DIMM arranca** con Java 21 usando Equinox launcher
-- **RUC wizard funciona** (Archivo / Nuevo / RUC)
-- **Herramientas ATS / Validar Anexo** abre ventana
-- **Nuevo / Anexo Transaccional** funciona
-- **Ingreso de facturas** funciona (con GTK2_RC_FILES=Raleigh)
+## Cómo se logró el menú ATS
 
-## Cambios realizados
+### Problema original
+Los plugins ATS requieren `org.eclipse.nebula.widgets.cdatetime` (widget de calendario), que a su vez requiere databinding 1.4.0+. Esos JARs no vienen con DIMM; el instalador los descarga del update site SRI, pero el servidor SRI ya no existe. Además, los JARs tienen `Bundle-RequiredExecutionEnvironment` con valores antiguos (CDC-1.1/Foundation-1.1, J2SE-1.4, J2SE-1.5, JavaSE-1.6) que Equinox 3.3 no resuelve en Java 21.
 
-### `dimm.sh`
+### Solución: 3 pasos
 
-- Reemplazado launcher Java propio por Equinox + Main-Class
-- Añadido `commons-collections.jar` al classpath JVM
-- Añadido `-Dosgi.java.profile`
-- Añadido `-Dosgi.parentClassloader=app` — permite acceso a java.sql module
-- Añadidos `--add-opens` para módulos Java necesarios
-- Eliminado `-Dosgi.bootdelegation` (ahora solo en config.ini)
-- Añadido `GDK_BACKEND=x11` como variable de entorno
+#### 1. JARs faltantes
+Los JARs de databinding 1.4.0+ y nebula cdatetime se obtuvieron del update site de ATS (`temp/plugins/`, ya descargados antes de que el servidor cayera). Se copiaron a `plugins/` para que Equinox los vea.
 
-### `configuration/config.ini`
+#### 2. BREE eliminado
+Se quitó `Bundle-RequiredExecutionEnvironment` de 12 JARs problemáticos:
+- `ec.gob.sri.dimm.api_1.9.3.jar` (JavaSE-1.6)
+- `ec.gob.sri.dimm.ats.modelo_1.2.0.jar` (JavaSE-1.6)
+- `ec.gob.sri.dimm.ats.ui_1.2.0.jar` (JavaSE-1.6)
+- `ec.gob.sri.dimm.ats.validacion_1.2.0.jar` (JavaSE-1.6)
+- `ec.gob.sri.dimm.data_1.18.0.jar` (JavaSE-1.6)
+- `org.eclipse.core.databinding_1.4.0.*.jar` (CDC-1.1/Foundation-1.1, J2SE-1.4)
+- `org.eclipse.core.databinding.beans_1.2.100*.jar` (J2SE-1.4)
+- `org.eclipse.core.databinding.observable_1.4.0*.jar` (CDC-1.1/Foundation-1.1, J2SE-1.4)
+- `org.eclipse.core.databinding.property_1.4.0*.jar` (CDC-1.1/Foundation-1.1, J2SE-1.4)
+- `org.eclipse.jface.databinding_1.5.0*.jar` (CDC-1.0/Foundation-1.0, J2SE-1.3)
+- `org.eclipse.nebula.cwt_0.9.0.HEAD.jar` (J2SE-1.5)
+- `org.eclipse.nebula.widgets.cdatetime_0.14.0.HEAD.jar` (J2SE-1.5)
 
-- `osgi.bootdelegation=java.sql,javax.sql` (sin sun.* ni com.sun.*)
-- `org.osgi.framework.bootdelegation=java.sql,javax.sql`
+#### 3. Auto-fix en dimm.sh
+Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y directorios en `plugins/`, detecta cualquier BREE con valor que no sea `JavaSE-*` o `OSGi/Minimum-*`, y lo remueve automáticamente. Esto asegura que cualquier plugin nuevo (instalado desde PLUGINSSRI/ o futuras actualizaciones) quede compatible sin intervención manual.
 
-### Plugins modificados
+### Otros cambios
+- **dimm.sh**: Equinox launcher, `osgi.java.profile=JavaSE-21.profile`, `osgi.parentClassloader=app`, `--add-opens` para módulos Java 21, `commons-collections.jar` en classpath.
+- **JavaSE-21.profile**: `executionenvironment` incluye JavaSE-1.6 hasta JavaSE-21 + todas las EEs antiguas.
+- **config.ini**: `osgi.bootdelegation=java.sql,javax.sql`.
+- **"Desinstalar Programas"**: bytecode ASM en `ApplicationActionBarAdvisor` + `RemoveExtensionAction.class` agregados al principal vía compilación inline.
+- **Plugin management**: PLUGINSSRI/ contiene 17 plugins SRI.
 
-- **`ec.gov.sri.dimm.spring_1.0.1.jar`**: Eliminadas exportaciones de `org.apache.commons.collections.*` de Export-Package (para evitar split-package)
-- **`ec.gov.sri.dimm.hibernate_1.0.1.jar`**: Ídem
-- **`ec.gov.sri.dimm.jasperviewer_1.0.1/META-INF/MANIFEST.MF`**: Ídem
-- **`ec.gov.sri.dimm.principal_1.0.1/META-INF/MANIFEST.MF`**: Añadido `Require-Bundle: org.apache.derby.core` (para que Spring cargue driver Derby)
-- **`org.apache.derby.core_10.3.1.4/META-INF/MANIFEST.MF`**: Creado con `DynamicImport-Package: *` (no existía, necesario para java.sql)
-
-## Problemas conocidos
-
-### 1. SWT/GTK crash al ingresar facturas (SIGSEGV en ButtonDrawData.draw)
-
-**Síntoma:** SIGSEGV en `libc.so.6` al renderizar botones Nebula CWT (`VButtonPainter.paintBackground`). Stack: `OS.memmove(GtkBorder) -> ButtonDrawData.draw -> Theme.drawBackground -> VButtonPainter.paintBackground`.
-
-**Causa:** SWT 3.3 (2007) nativo (`libswt-pi-gtk-3346.so`) incompatible con GTK2 2.24.33 + tema Adwaita. El `memmove` para copiar `GtkBorder` desde memoria nativa crashea cuando el tema devuelve borders con layout distinto al esperado.
-
-**Workaround actual:** `GTK2_RC_FILES=/usr/share/themes/Raleigh/gtk-2.0/gtkrc GDK_BACKEND=x11` — usar tema Raleigh (el más simple) + backend X11.
-
-**Pendiente:** Si el crash persiste con otros datos/menús, considerar:
-- Instalar `gtk2-engines-clearlooks` y usar tema Clearlooks (default de 2007)
-- Reemplazar SWT 3.3 nativo por una versión más nueva (3.8+)
-- Usar LD_PRELOAD para parchear `Java_org_eclipse_swt_internal_gtk_OS_memmove__Lorg_eclipse_swt_internal_gtk_GtkBorder_2JJ`
-
-### 2. Actualización por Internet
-
-**Síntoma:** Programa / Agregar Nuevos Programas / Actualización por Internet da error de red (`http://descargas.sri.gov.ec/dimm/updates` no existe).
-
-**Causa:** El servidor SRI ya no existe. No se puede arreglar. Es un feature legacy.
-
-## Tareas Pendientes
-
-### A. Pruebas interactivas a fondo (ALTA PRIORIDAD)
-El usuario debe probar exhaustivamente:
-- [ ] **Programa / Desinstalar Programas** → debe abrir Configuration Manager
-- [ ] RUC: crear contribuyente, guardar, exportar
-- [ ] ATS: ingresar varias facturas con diferentes datos
-- [ ] ATS Validar: probar con datos reales
-- [ ] Anexo Transaccional: wizard completo
-- [ ] Reportes / exportaciones
-- Si algún menú/feature falla, reportar el error exacto
-
-## Completado
-
-### "Desinstalar Programas" en menú Programa
-- Creado `RemoveExtensionAction.java` → abre `ConfigurationManagerWindow(Shell)` (el gestor de configuración de Eclipse Update UI)
-- Compilado y copiado a `ec.gov.sri.dimm.principal_1.0.1/ec/gov/sri/dimm/principal/actions/`
-- Modificado `ApplicationActionBarAdvisor.class` vía ASM 9.6: añadido field `removeExtensionAction`, creado en `makeActions()`, añadido al menú "Programa" en `fillMenuBar()` (después de "Agregar Nuevos Programas")
-- No requiere cambios en `plugin.xml` ni `MANIFEST.MF`
-
-### Limpieza para GitHub
-- Eliminados: `hs_err_pid*.log`, `derby.log`, `configuration/*.log`, `workspace/`, `DimmDb/` (backup en `/tmp/DimmDb-backup/`)
-- Temp files eliminados
-
-## Resumen de Dependencias OSGi
-
-- `ec.gov.sri.dimm.principal` → Require-Bundle: `org.eclipse.update.ui`, `org.eclipse.update.configurator`, `org.eclipse.update.core`, `ec.gov.sri.dimm.hibernate`, `ec.gov.sri.dimm.spring`, `ec.gov.sri.dimm.core`, `org.apache.derby.core`
-- `ec.gov.sri.dimm.spring` → Require-Bundle: `ec.gov.sri.dimm.hibernate`, `org.apache.derby.core`
-- `ec.gov.sri.dimm.hibernate` → Bundle-ClassPath con hibernate3.jar (no tiene Require-Bundle)
-- `ec.gob.sri.dimm.ats.ui` → Require-Bundle con `ec.gob.sri.dimm.data`, `ec.gob.sri.dimm.ats.modelo`. Activator usa `java.sql.SQLException` sin importarlo (resuelto via `osgi.parentClassloader=app`)
-- `org.apache.derby.core` → DynamicImport-Package: * (para java.sql)
+## Known Issues
+1. **SWT/GTK crash con ciertos temas** — usar `GTK2_RC_FILES=Raleigh` o `GDK_BACKEND=x11`.
+2. **Actualización por Internet** — servidor SRI caído (legacy, no arreglable).
+3. **Spring/hibernate exportan commons-collections** — posible split-package con `lib/commons-collections.jar`.
