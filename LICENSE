@@ -1,0 +1,102 @@
+Eclipse Public License - v 2.0
+
+THE ACCOMPANYING PROGRAM IS PROVIDED UNDER THE TERMS OF THIS ECLIPSE
+PUBLIC LICENSE ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION
+OF THE PROGRAM CONSTITUTES RECIPIENT'S ACCEPTANCE OF THIS AGREEMENT.
+
+1. DEFINITIONS
+
+"Contribution" means:
+  a) in the case of the initial Contributor, the initial content
+     Distributed under this Agreement, and
+  b) in the case of each subsequent Contributor:
+     i) changes to the Program, and
+     ii) additions to the Program;
+  where such changes and/or additions to the Program originate from
+  and are Distributed by that particular Contributor.
+
+"Contributor" means any person or entity that Distributes the Program.
+
+"Licensed Patents" mean patent claims licensable by a Contributor
+which are necessarily infringed by the use or sale of its Contribution
+alone or when combined with the Program.
+
+"Program" means the Contributions Distributed in accordance with this
+Agreement.
+
+"Recipient" means anyone who receives the Program under this
+Agreement or any Secondary License (as applicable), including
+Contributors.
+
+"Distribution" means the act of distributing, delivering or otherwise
+making available.
+
+"Source Code" means the form of a Program preferred for making
+modifications.
+
+"Secondary License" means either the GNU General Public License,
+Version 2.0, or any later versions of that license, including any
+exceptions or additional permissions as identified by the initial
+Contributor.
+
+2. GRANT OF RIGHTS
+
+  a) Subject to the terms of this Agreement, each Contributor hereby
+     grants Recipient a non-exclusive, worldwide, royalty-free
+     copyright license to reproduce, prepare Derivative Works of,
+     publicly display, publicly perform, Distribute and sublicense the
+     Contribution of such Contributor, if any, and such Derivative
+     Works.
+
+  b) Subject to the terms of this Agreement, each Contributor hereby
+     grants Recipient a non-exclusive, worldwide, royalty-free patent
+     license under Licensed Patents to make, use, sell, offer to sell,
+     import and otherwise transfer the Contribution of such
+     Contributor, if any, in whole or in part.
+
+3. REQUIREMENTS
+
+A Contributor may choose to distribute the Program in object code
+form under its own license agreement, provided that:
+  a) it complies with the terms and conditions of this Agreement; and
+  b) its license agreement:
+     i) effectively disclaims on behalf of all Contributors all
+        warranties and conditions, express and implied, including
+        warranties or conditions of title and non-infringement, and
+        implied warranties or conditions of merchantability and
+        fitness for a particular purpose;
+     ii) effectively excludes on behalf of all Contributors all
+        liability for damages, including direct, indirect, special,
+        incidental and consequential damages, such as lost profits;
+     iii) states that any provisions which differ from this Agreement
+        are offered by that Contributor alone and not by any other
+        party; and
+     iv) states that source code for the Program is available from
+        such Contributor, and informs licensees how to obtain it in a
+        reasonable manner on or through a medium customarily used for
+        software exchange.
+
+4. COMMERCIAL DISTRIBUTION
+
+Commercial distributors of software may accept certain
+responsibilities with respect to end users, business partners and the
+like. While this license is intended to facilitate the commercial use
+of the Program, the Contributor who includes the Program in a
+commercial product offering should do so in a manner which does not
+create potential liability for other Contributors. Therefore, if a
+Contributor includes the Program in a commercial product offering,
+such Contributor ("Commercial Contributor") hereby agrees to defend
+and indemnify every other Contributor ("Indemnified Contributor")
+against any losses, damages and costs (collectively "Losses") arising
+from claims, lawsuits and other legal actions brought by a third
+party against the Indemnified Contributor to the extent caused by the
+acts or omissions of such Commercial Contributor in connection with
+its distribution of the Program in a commercial product offering.
+
+[Full EPL 2.0 text at https://www.eclipse.org/legal/epl-2.0/]
+
+---
+
+The SRI DIMM plugins are copyright of Servicio de Rentas Internas del
+Ecuador and are distributed under the LGPL license as stated in the
+ATS feature license.
