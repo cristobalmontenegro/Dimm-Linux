@@ -6,3 +6,9 @@ core.*
 *.hprof
 derby.log
 configuration/org.eclipse.osgi/
+configuration/org.eclipse.core.runtime/
+configuration/org.eclipse.equinox.app/
+configuration/org.eclipse.update/history/
+configuration/org.eclipse.update/last.config.stamp
+configuration/*.log
+DimmDb/
