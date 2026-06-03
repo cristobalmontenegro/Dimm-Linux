@@ -8,7 +8,7 @@ python3 - "$DIR" << 'PYEOF'
 import zipfile, io, re, os, sys
 
 def strip_bree(jar_data):
-    """Remove BREE if it contains CDC, Foundation, or J2SE (incompatible with Java 21)"""
+    """Remove BREE (only keep OSGi/Minimum)"""
     try:
         with zipfile.ZipFile(io.BytesIO(jar_data), 'r') as z:
             if 'META-INF/MANIFEST.MF' not in z.namelist():
@@ -20,9 +20,9 @@ def strip_bree(jar_data):
             if not m:
                 return None  # No BREE
             bree = m.group(1).strip()
-            # Only strip if not JavaSE or OSGi/Minimum
-            if bree.startswith('JavaSE-') or bree.startswith('OSGi/Minimum-'):
-                return None  # Compatible, skip
+            # Only keep OSGi/Minimum (spec level), strip everything else
+            if bree.startswith('OSGi/Minimum-'):
+                return None  # Keep OSGi spec level
             # Strip BREE
             new_mf = re.sub(r'\n?Bundle-RequiredExecutionEnvironment:[^\n]*(?:\n\s[^\n]*)*\n?', '\n', lines)
             new_mf = new_mf.strip() + '\n'
@@ -38,7 +38,6 @@ def strip_bree(jar_data):
                             continue
                         zout.writestr(item, zin.read(fn))
                     zout.writestr('META-INF/MANIFEST.MF', new_mf.encode('utf-8'))
-            print(f'  Fixed BREE: {os.path.basename(fn)} ({bree})')
             return out.getvalue()
     except Exception as e:
         print(f'  Error processing JAR: {e}')
@@ -57,6 +56,7 @@ for root, dirs, files in os.walk(plugins_dir):
                 with open(path, 'wb') as fh:
                     fh.write(result)
                 count += 1
+                print(f'  Fixed BREE: {f}')
     # Directory-based plugins (MANIFEST.MF)
     for d in dirs:
         mf_path = os.path.join(root, d, 'META-INF', 'MANIFEST.MF')
@@ -66,7 +66,7 @@ for root, dirs, files in os.walk(plugins_dir):
             lines = content.replace('\r\n', '\n').replace('\r', '\n')
             unfolded = re.sub(r'\n ', '', lines)
             m = re.search(r'Bundle-RequiredExecutionEnvironment:\s*(.*?)(?:\n\w+|$)', unfolded, re.DOTALL)
-            if m and not m.group(1).strip().startswith('JavaSE-') and not m.group(1).strip().startswith('OSGi/Minimum-'):
+            if m and not m.group(1).strip().startswith('OSGi/Minimum-'):
                 new_content = re.sub(r'\n?Bundle-RequiredExecutionEnvironment:[^\n]*(?:\n\s[^\n]*)*\n?', '\n', lines).strip() + '\n'
                 with open(mf_path, 'w') as fh:
                     fh.write(new_content)
