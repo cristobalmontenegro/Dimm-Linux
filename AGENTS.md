@@ -49,3 +49,9 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 1. **SWT/GTK crash con ciertos temas** — usar `GTK2_RC_FILES=Raleigh` o `GDK_BACKEND=x11`.
 2. **Actualización por Internet** — servidor SRI caído (legacy, no arreglable).
 3. **Spring/hibernate exportan commons-collections** — posible split-package con `lib/commons-collections.jar`.
+
+## Pending Tasks
+1. **Probar desinstalar/reinstalar ATS** — Programa → Desinstalar Programas, luego Agregar Nuevos Programas → `PLUGINSSRI/ats.plugin.1.15.0.zip`, verificar que Herramientas ATS vuelve a aparecer.
+2. **Probar instalación de los otros 16 plugins SRI** — desde PLUGINSSRI/ (ACA, ADI, AFIC, ANR, devIVA, ABT, APS, MID, RDEP, DP, ICE, OPRE, REOC, ValidadorConsola).
+3. **Resolver split-package commons-collections** — spring e hibernate exportan `org.apache.commons.collections` y `lib/commons-collections.jar` está en el classpath. Verificar si causa conflictos al instalar plugins.
+4. **Hacer commit de la feature de autodescarga** — si se implementa que DIMM descargue plugins desde un mirror.
