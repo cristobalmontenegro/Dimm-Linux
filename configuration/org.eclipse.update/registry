@@ -1,7 +1,11 @@
 #This is a generated file; do not edit.
-#Mon Jun 01 19:59:12 ECT 2026
+#Tue Jun 02 20:52:58 ECT 2026
+feature_ec.gob.sri.dimm.adi_1.6.0=feature_ec.gob.sri.dimm.adi_1.6.0
 feature_ec.gob.sri.dimm.ats_1.15.0=feature_ec.gob.sri.dimm.ats_1.15.0
 feature_ec.gob.sri.dimm.base_1.9.6=feature_ec.gob.sri.dimm.base_1.9.6
+plugin_ec.gob.sri.dimm.adi.modelo_1.2.0=plugin_ec.gob.sri.dimm.adi.modelo_1.2.0
+plugin_ec.gob.sri.dimm.adi.ui_1.2.0=plugin_ec.gob.sri.dimm.adi.ui_1.2.0
+plugin_ec.gob.sri.dimm.adi.validacion_1.2.0=plugin_ec.gob.sri.dimm.adi.validacion_1.2.0
 plugin_ec.gob.sri.dimm.api_1.9.3=plugin_ec.gob.sri.dimm.api_1.9.3
 plugin_ec.gob.sri.dimm.ats.modelo_1.2.0=plugin_ec.gob.sri.dimm.ats.modelo_1.2.0
 plugin_ec.gob.sri.dimm.ats.ui_1.2.0=plugin_ec.gob.sri.dimm.ats.ui_1.2.0
