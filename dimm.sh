@@ -100,6 +100,6 @@ java \
   --add-opens java.xml/com.sun.org.apache.xerces.internal.parsers=ALL-UNNAMED \
   --add-opens java.xml/com.sun.org.apache.xml.internal.serialize=ALL-UNNAMED \
   --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED \
-  -cp "plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar:lib/commons-collections.jar" \
+  -cp "plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar" \
   org.eclipse.equinox.launcher.Main \
   "$@"
