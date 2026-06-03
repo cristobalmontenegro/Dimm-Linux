@@ -51,7 +51,8 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 3. **Spring/hibernate exportan commons-collections** — posible split-package con `lib/commons-collections.jar`.
 
 ## Pending Tasks
-1. **Probar desinstalar/reinstalar ATS** — Programa → Desinstalar Programas (ahora borra JARs y reinicia automáticamente), luego Agregar Nuevos Programas → `PLUGINSSRI/ats.plugin.1.15.0.zip`, verificar que Herramientas ATS vuelve a aparecer.
+1. **Probar desinstalar/reinstalar ATS** — Programa → Desinstalar Programas (ahora borra JARs y reinicia automáticamente), luego Agregar Nuevos Programas → `PLUGINSSRI/ats.plugin.1.15.0.zip`, verificar que Herramientas ATS vuelve a aparecer. ✅ Probado y funciona.
+2. **Probar instalación de los otros 16 plugins SRI** — desde PLUGINSSRI/ (ACA, ADI, AFIC, ANR, devIVA, ABT, APS, MID, RDEP, DP, ICE, OPRE, REOC, ValidadorConsola).
 2. **Probar instalación de los otros 16 plugins SRI** — desde PLUGINSSRI/ (ACA, ADI, AFIC, ANR, devIVA, ABT, APS, MID, RDEP, DP, ICE, OPRE, REOC, ValidadorConsola).
 3. ~~**Resolver split-package commons-collections**~~ ✅ — se quitó `lib/commons-collections.jar` del classpath JVM en `dimm.sh`. OSGi resuelve commons-collections a través del export de spring. También se removió `org.apache.commons.collections.*` de Export-Package en hibernate para evitar split-package (spring y hibernate exportaban el mismo paquete con versiones distintas).
 4. **Auto-descarga de plugins** desde mirror (opcional).
