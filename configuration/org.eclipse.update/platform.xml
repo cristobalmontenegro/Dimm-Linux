@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config date="1780367587585" transient="false" version="3.0">
+<config date="1780450250547" transient="false" version="3.0">
 <site enabled="true" policy="USER-EXCLUDE" updateable="true" url="platform:/base/">
 <feature id="ec.gov.sri.dimm.feature.core" plugin-identifier="ec.gov.sri.dimm.principal" url="features/ec.gov.sri.dimm.feature.core_1.0.1/" version="1.0.1">
 </feature>
