@@ -1,20 +1,9 @@
-#This is a generated file; do not edit.
-#Tue Jun 02 20:52:58 ECT 2026
-feature_ec.gob.sri.dimm.adi_1.6.0=feature_ec.gob.sri.dimm.adi_1.6.0
-feature_ec.gob.sri.dimm.ats_1.15.0=feature_ec.gob.sri.dimm.ats_1.15.0
-feature_ec.gob.sri.dimm.base_1.9.6=feature_ec.gob.sri.dimm.base_1.9.6
-plugin_ec.gob.sri.dimm.adi.modelo_1.2.0=plugin_ec.gob.sri.dimm.adi.modelo_1.2.0
-plugin_ec.gob.sri.dimm.adi.ui_1.2.0=plugin_ec.gob.sri.dimm.adi.ui_1.2.0
-plugin_ec.gob.sri.dimm.adi.validacion_1.2.0=plugin_ec.gob.sri.dimm.adi.validacion_1.2.0
-plugin_ec.gob.sri.dimm.api_1.9.3=plugin_ec.gob.sri.dimm.api_1.9.3
-plugin_ec.gob.sri.dimm.ats.modelo_1.2.0=plugin_ec.gob.sri.dimm.ats.modelo_1.2.0
-plugin_ec.gob.sri.dimm.ats.ui_1.2.0=plugin_ec.gob.sri.dimm.ats.ui_1.2.0
-plugin_ec.gob.sri.dimm.ats.validacion_1.2.0=plugin_ec.gob.sri.dimm.ats.validacion_1.2.0
-plugin_ec.gob.sri.dimm.data_1.18.0=plugin_ec.gob.sri.dimm.data_1.18.0
 plugin_org.eclipse.core.databinding.beans_1.2.100.I20100824-0800=plugin_org.eclipse.core.databinding.beans_1.2.100.I20100824-0800
 plugin_org.eclipse.core.databinding.observable_1.4.0.I20110222-0800=plugin_org.eclipse.core.databinding.observable_1.4.0.I20110222-0800
 plugin_org.eclipse.core.databinding.property_1.4.0.I20110222-0800=plugin_org.eclipse.core.databinding.property_1.4.0.I20110222-0800
 plugin_org.eclipse.core.databinding_1.4.0.I20110111-0800=plugin_org.eclipse.core.databinding_1.4.0.I20110111-0800
 plugin_org.eclipse.jface.databinding_1.5.0.I20100907-0800=plugin_org.eclipse.jface.databinding_1.5.0.I20100907-0800
+plugin_org.eclipse.nebula.cwt_0.9.0.201304081249=plugin_org.eclipse.nebula.cwt_0.9.0.201304081249
 plugin_org.eclipse.nebula.cwt_0.9.0.HEAD=plugin_org.eclipse.nebula.cwt_0.9.0.HEAD
+plugin_org.eclipse.nebula.widgets.cdatetime_0.14.0.201304081249=plugin_org.eclipse.nebula.widgets.cdatetime_0.14.0.201304081249
 plugin_org.eclipse.nebula.widgets.cdatetime_0.14.0.HEAD=plugin_org.eclipse.nebula.widgets.cdatetime_0.14.0.HEAD
