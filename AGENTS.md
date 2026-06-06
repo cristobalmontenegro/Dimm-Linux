@@ -3,7 +3,7 @@
 ## Goal
 Hacer que DIMM (Eclipse 3.3 RCP + plugins SRI) funcione con Java 21 en Linux (GTK).
 
-## Current State (Jun 3 2026) ✅
+## Current State (Jun 5 2026) ✅
 - **DIMM arranca** con Java 21 + Equinox launcher
 - **Menú ATS** funciona (Herramientas ATS visible y operativo)
 - **Plugin management** funcional (instalar/desinstalar vía Programa, Agregar/Desinstalar)
@@ -13,6 +13,7 @@ Hacer que DIMM (Eclipse 3.3 RCP + plugins SRI) funcione con Java 21 en Linux (GT
 - **FeatureXmlReader** — helper class que lee `feature.xml` desde directorio O desde JAR (fallback), usada por el auto-cleanup de dimm.sh
 - **GitHub**: https://github.com/cristobalmontenegro/Dimm-Linux
 - **ADI e ICE** instalados y funcionando
+- **"Agregar desde Internet" arreglado** ✅ — `ActualizacionDialog$4` reemplazado para descargar zips desde URL en vez de usar update site SRI caído
 - **Spring context multi-plugin**: `createContext()` reescrito vía ASM para usar `SpringContextHelper.findAllContextFiles()`
   - Escanea `plugins/*/applicationContext*.xml` y retorna paths `file:` absolutos
   - `ClassPathXmlApplicationContext` procesa `file:` URLs como `UrlResource`, bypassing classloader OSGi
@@ -68,7 +69,7 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 
 ## Known Issues
 1. **SWT/GTK crash con ciertos temas** — usar `GTK2_RC_FILES=Raleigh` o `GDK_BACKEND=x11`.
-2. **Actualización por Internet** — servidor SRI caído (legacy, no arreglable).
+2. **Actualización por Internet** ✅ arreglado — `ActualizacionDialog$4` ahora muestra InputDialog para URL zip, descarga, extrae e instala vía el mismo mecanismo local. Funciona con URLs directas de `descargas.sri.gob.ec` (o cualquier URL de zip).
 3. **Split-package commons-collections** ✅ resuelto — se quitó `lib/commons-collections.jar` del classpath JVM y se removió export de hibernate.
 4. **createContext() success path no restaura TCCL** — después de crear el contexto, el TCCL queda como el classloader del principal. No debería causar problemas pero es mejorable.
 5. **UninstallDialog.getPluginFiles() no lee feature.xml desde JARs** ⚠️ — si el feature se instaló como `features/*.jar` (no directorio), `new File(featureDir, "feature.xml").exists()` falla y retorna lista vacía. Solución parcial: dimm.sh extrae JARs a directorios al arrancar, y el auto-cleanup elimina huérfanos. Para el caso install→uninstall en misma sesión (sin restart), el cleanup corre al siguiente arranque.
@@ -81,7 +82,7 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 3. **Probar install→uninstall en misma sesión** (sin restart intermedio): verificar que el auto-cleanup de dimm.sh en el siguiente arranque elimine los plugins huérfanos.
 4. **Probar los otros plugins SRI** — ACA, AFIC, ANR, devIVA, ABT, APS, MID, OPRE, REOC, ValidadorConsola.
 5. **Probar ICE + ADI** ✅ — funcionan (no usan Spring).
-6. **Auto-descarga de plugins** desde mirror (opcional).
+ 6. **Probar "Agregar desde Internet"** — Programa → Agregar Nuevos Programas → Actualización por Internet, probar con URL de zip SRI (ej: `https://descargas.sri.gob.ec/download/anexos/ats/ats.plugin.1.15.0.zip`).
 
 ## Relevant Files
 - `dimm.sh`: launcher + auto-fix BREE + feature JAR extraction + orphan cleanup + Java 21 flags
@@ -91,6 +92,9 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 - `plugins/ec.gov.sri.dimm.principal_1.0.1/ec/gov/sri/dimm/principal/util/SpringContextHelper\$1.class`: FilenameFilter anónimo (inline, no olvidar copiar ambos al compilar)
 - `plugins/ec.gov.sri.dimm.principal_1.0.1/ec/gov/sri/dimm/principal/util/FeatureXmlReader.class`: helper que lee `feature.xml` desde dir o JAR
 - `plugins/ec.gov.sri.dimm.principal_1.0.1/ec/gov/sri/dimm/principal/formas/UninstallDialog.class`: parcheado — `File.delete()` → `deleteDirectory()` recursivo
+- `plugins/ec.gov.sri.dimm.principal_1.0.1/ec/gov/sri/dimm/principal/formas/InternetDownloader.class`: helper que descarga zip desde URL, lo extrae y lo instala
+- `plugins/ec.gov.sri.dimm.principal_1.0.1/ec/gov/sri/dimm/principal/formas/ActualizacionDialog$4.class`: parcheado via ASM — llama a `InternetDownloader.downloadAndInstall()` en vez de usar update site URL
+- `src/ec/gov/sri/dimm/principal/formas/InternetDownloader.java`: fuente de InternetDownloader
 - `plugins/ec.gov.sri.dimm.rdep_3.12.0/META-INF/MANIFEST.MF`: `Eclipse-RegisterBuddy`
 - `plugins/ec.gov.sri.dimm.dp_1.0.2/META-INF/MANIFEST.MF`: `Eclipse-RegisterBuddy`
 - `plugins/ec.gov.sri.dimm.comun_1.0.1/META-INF/MANIFEST.MF`: `Eclipse-RegisterBuddy`
