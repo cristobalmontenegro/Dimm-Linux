@@ -69,7 +69,7 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 
 ## Known Issues
 1. **SWT/GTK crash con ciertos temas** — usar `GTK2_RC_FILES=Raleigh` o `GDK_BACKEND=x11`.
-2. **Actualización por Internet** ✅ arreglado — `ActualizacionDialog$4` ahora muestra InputDialog para URL zip, descarga, extrae e instala vía el mismo mecanismo local. Funciona con URLs directas de `descargas.sri.gob.ec` (o cualquier URL de zip).
+2. **Actualización por Internet** ✅ arreglado — `InternetDownloader` ahora lanza un hilo background, $4.run() retorna inmediatamente (BusyIndicator sale), y el hilo background muestra InputDialog via syncExec (sin conflicto), descarga y extrae el zip, y abre el instalador vía `UpdateManagerUI.openInstaller`.
 3. **Split-package commons-collections** ✅ resuelto — se quitó `lib/commons-collections.jar` del classpath JVM y se removió export de hibernate.
 4. **createContext() success path no restaura TCCL** — después de crear el contexto, el TCCL queda como el classloader del principal. No debería causar problemas pero es mejorable.
 5. **UninstallDialog.getPluginFiles() no lee feature.xml desde JARs** ⚠️ — si el feature se instaló como `features/*.jar` (no directorio), `new File(featureDir, "feature.xml").exists()` falla y retorna lista vacía. Solución parcial: dimm.sh extrae JARs a directorios al arrancar, y el auto-cleanup elimina huérfanos. Para el caso install→uninstall en misma sesión (sin restart), el cleanup corre al siguiente arranque.
@@ -82,7 +82,7 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 3. **Probar install→uninstall en misma sesión** (sin restart intermedio): verificar que el auto-cleanup de dimm.sh en el siguiente arranque elimine los plugins huérfanos.
 4. **Probar los otros plugins SRI** — ACA, AFIC, ANR, devIVA, ABT, APS, MID, OPRE, REOC, ValidadorConsola.
 5. **Probar ICE + ADI** ✅ — funcionan (no usan Spring).
- 6. **Probar "Agregar desde Internet"** — Programa → Agregar Nuevos Programas → Actualización por Internet, probar con URL de zip SRI (ej: `https://descargas.sri.gob.ec/download/anexos/ats/ats.plugin.1.15.0.zip`).
+6. **Mejorar "Agregar desde Internet"**: idealmente debería consultar `descargas.sri.gob.ec/download/anexos/`, mostrar lista de plugins disponibles, usuario selecciona, descarga e instala
 
 ## Relevant Files
 - `dimm.sh`: launcher + auto-fix BREE + feature JAR extraction + orphan cleanup + Java 21 flags

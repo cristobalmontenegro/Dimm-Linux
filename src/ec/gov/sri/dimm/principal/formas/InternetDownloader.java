@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.update.ui.UpdateJob;
 import org.eclipse.update.ui.UpdateManagerUI;
@@ -18,69 +19,109 @@ import ec.gov.sri.dimm.core.DimmCoreUtilsCommon;
 
 public class InternetDownloader {
 
-    public static void downloadAndInstall(ActualizacionDialog dialog) {
-        Shell shell = dialog.getShell();
-        InputDialog dlg = new InputDialog(shell,
-            "Descargar desde Internet",
-            "Ingrese la URL del archivo ZIP del plugin a instalar:",
-            "https://descargas.sri.gob.ec/download/anexos/...",
-            null);
-        if (dlg.open() != Window.OK) return;
-        String urlStr = dlg.getValue();
-        if (urlStr == null || urlStr.trim().isEmpty()) return;
+    public static void downloadAndInstall(final ActualizacionDialog dialog) {
+        final Shell shell = dialog.getShell();
+        final Display display = shell.getDisplay();
 
-        try {
-            String dirPath = Utils.getProperty("dir.path");
-            String tempDir = dirPath + "/temp";
-            new File(tempDir).mkdirs();
+        new Thread("DIMM-InternetDownload") {
+            @Override
+            public void run() {
+                // Get URL from user on UI thread
+                final String[] urlResult = new String[1];
+                display.syncExec(new Runnable() {
+                    @Override
+                    public void run() {
+                        InputDialog dlg = new InputDialog(shell,
+                            "Descargar desde Internet",
+                            "Ingrese la URL del archivo ZIP del plugin a instalar:",
+                            "https://descargas.sri.gob.ec/download/anexos/...",
+                            null);
+                        if (dlg.open() == Window.OK) {
+                            urlResult[0] = dlg.getValue();
+                        }
+                    }
+                });
 
-            URL url = new URL(urlStr.trim());
-            String path = url.getPath();
-            String fileName = path.substring(path.lastIndexOf('/') + 1);
-            if (fileName.isEmpty()) fileName = "plugin.zip";
-            String zipPath = tempDir + "/" + fileName;
+                final String urlStr = urlResult[0];
+                if (urlStr == null || urlStr.trim().isEmpty()) return;
 
-            BufferedInputStream in = new BufferedInputStream(url.openStream());
-            BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(zipPath));
-            byte[] buf = new byte[8192];
-            int n;
-            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
-            in.close();
-            out.close();
+                try {
+                    // Download zip on background thread
+                    String dirPath = Utils.getProperty("dir.path");
+                    String tempDir = dirPath + "/temp";
+                    new File(tempDir).mkdirs();
 
-            String extractPath = DimmCoreUtilsCommon.unzipFile(zipPath, dirPath);
-            if (extractPath == null || extractPath.isEmpty()) {
-                DimmCoreUtils.desplegarError("Error al extraer el archivo ZIP", null);
-                return;
+                    URL url = new URL(urlStr.trim());
+                    String path = url.getPath();
+                    String fileName = path.substring(path.lastIndexOf('/') + 1);
+                    if (fileName.isEmpty()) fileName = "plugin.zip";
+                    final String zipPath = tempDir + "/" + fileName;
+
+                    BufferedInputStream in = new BufferedInputStream(url.openStream());
+                    BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(zipPath));
+                    byte[] buf = new byte[8192];
+                    int n;
+                    while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                    in.close();
+                    out.close();
+
+                    // Extract
+                    final String extractPath = DimmCoreUtilsCommon.unzipFile(zipPath, dirPath);
+                    if (extractPath == null || extractPath.isEmpty()) {
+                        display.syncExec(new Runnable() {
+                            @Override
+                            public void run() {
+                                DimmCoreUtils.desplegarError("Error al extraer el archivo ZIP", null);
+                            }
+                        });
+                        return;
+                    }
+
+                    // Install on UI thread
+                    display.syncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                String filePrefix = "file:";
+                                String exPath = extractPath;
+                                if (!exPath.startsWith("/")) filePrefix = "file://";
+                                String fileUrl = filePrefix + exPath;
+
+                                boolean nuevaExtension = getNuevaExtension(dialog);
+                                UpdateSearchRequest request;
+                                String jobName;
+
+                                if (nuevaExtension) {
+                                    request = callGetSearchRequest(dialog, fileUrl);
+                                    jobName = "Buscar nuevas extensiones";
+                                } else {
+                                    request = callGetUpdateRequest(dialog, fileUrl);
+                                    jobName = "Buscando actualizaciones...";
+                                }
+
+                                if (request == null) {
+                                    DimmCoreUtils.desplegarError("Error al preparar la instalacion", null);
+                                    return;
+                                }
+
+                                UpdateJob job = new UpdateJob(jobName, request);
+                                UpdateManagerUI.openInstaller(shell, job);
+                            } catch (Exception e) {
+                                DimmCoreUtils.desplegarError("Error al instalar: " + e.getMessage(), e);
+                            }
+                        }
+                    });
+
+                } catch (final Exception e) {
+                    display.syncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            DimmCoreUtils.desplegarError("Error al descargar el plugin: " + e.getMessage(), e);
+                        }
+                    });
+                }
             }
-
-            String filePrefix = "file:";
-            if (!extractPath.startsWith("/")) filePrefix = "file://";
-            String fileUrl = filePrefix + extractPath;
-
-            boolean nuevaExtension = getNuevaExtension(dialog);
-            UpdateSearchRequest request;
-            String jobName;
-
-            if (nuevaExtension) {
-                request = callGetSearchRequest(dialog, fileUrl);
-                jobName = "Buscar nuevas extensiones";
-            } else {
-                request = callGetUpdateRequest(dialog, fileUrl);
-                jobName = "Buscando actualizaciones...";
-            }
-
-            if (request == null) {
-                DimmCoreUtils.desplegarError("Error al preparar la instalacion", null);
-                return;
-            }
-
-            UpdateJob job = new UpdateJob(jobName, request);
-            UpdateManagerUI.openInstaller(shell, job);
-
-        } catch (Exception e) {
-            DimmCoreUtils.desplegarError("Error al descargar el plugin: " + e.getMessage(), e);
-        }
+        }.start();
     }
 
     private static boolean getNuevaExtension(ActualizacionDialog dialog) throws Exception {
