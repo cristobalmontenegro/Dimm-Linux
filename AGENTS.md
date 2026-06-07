@@ -59,14 +59,14 @@ Se quitó `Bundle-RequiredExecutionEnvironment` de 12 JARs problemáticos:
 - `org.eclipse.nebula.widgets.cdatetime_0.14.0.HEAD.jar` (J2SE-1.5)
 
 #### 3. Auto-fix en dimm.sh
-Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y directorios en `plugins/`, detecta cualquier BREE con valor que no sea `JavaSE-*` o `OSGi/Minimum-*`, y lo remueve automáticamente. Esto asegura que cualquier plugin nuevo (instalado desde PLUGINSSRI/ o futuras actualizaciones) quede compatible sin intervención manual.
+Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y directorios en `plugins/`, detecta cualquier BREE con valor que no sea `JavaSE-*` o `OSGi/Minimum-*`, y lo remueve automáticamente. Esto asegura que cualquier plugin nuevo (instalado desde el SRI o futuras actualizaciones) quede compatible sin intervención manual.
 
 ### Otros cambios
 - **dimm.sh**: Equinox launcher, `osgi.java.profile=JavaSE-21.profile`, `osgi.parentClassloader=app`, `--add-opens` para módulos Java 21.
 - **JavaSE-21.profile**: `executionenvironment` incluye JavaSE-1.6 hasta JavaSE-21 + todas las EEs antiguas.
 - **config.ini**: `osgi.bootdelegation=java.sql,javax.sql`.
 - **"Desinstalar Programas"**: bytecode ASM en `ApplicationActionBarAdvisor` + `RemoveExtensionAction.class` agregados al principal vía compilación inline.
-- **Plugin management**: PLUGINSSRI/ contiene 17 plugins SRI.
+- **Plugin management**: los plugins SRI se instalan desde el SRI vía "Instalación por Internet".
 - **Eclipse-RegisterBuddy**: agregado a RDEP, DP y Comun para que el principal pueda cargar sus clases vía buddy policy.
 - **SpringContextHelper**: clase helper en `ec.gov.sri.dimm.principal.util` que escanea `plugins/` y retorna paths `file:` absolutos.
 - **FeatureXmlReader**: clase helper en `ec.gov.sri.dimm.principal.util` que lee `feature.xml` desde un directorio o un JAR.
