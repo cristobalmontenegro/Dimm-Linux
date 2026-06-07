@@ -1,71 +1,71 @@
 # DIMM-Linux
 
-**DIMM** (Declaración de Impuestos y Manejo de Módulos) is the tax declaration software mandated by Ecuador's **Servicio de Rentas Internas (SRI)** for filing annexes such as ATS, RDEP, ICE, ADI, and many others.
+**DIMM** (Declaración de Impuestos y Manejo de Módulos) es el software de declaración de impuestos del **Servicio de Rentas Internas del Ecuador (SRI)** para presentar anexos como ATS, RDEP, ICE, ADI y muchos otros.
 
-It was built as an **Eclipse 3.3 RCP** application (circa 2007), originally distributed only for **Windows** and designed to run on **Java 6**. The official installer downloaded extensions from an SRI update site that no longer responds in update site format.
+Fue construido como una aplicación **Eclipse 3.3 RCP** (~2007), distribuido originalmente solo para **Windows** y diseñado para **Java 6**. El instalador oficial descargaba extensiones desde un sitio de actualizaciones del SRI que ya no responde en formato update site.
 
-**This project is the only way to run DIMM on modern Linux.**
+**Este proyecto es la única forma de ejecutar DIMM en Linux moderno.**
 
-## Why this exists
+## Por qué existe
 
-Without this migration:
-- DIMM crashes on startup (SWT/GTK incompatibility, classloader issues, missing dependencies)
-- The update site (`http://descargas.sri.gov.ec/dimm/updates`) is dead — no extensions can be installed
-- Java 6-8 are EOL and unavailable on modern distributions
-- Eclipse 3.3 RCP cannot resolve plugins compiled for Java 21
+Sin esta migración:
+- DIMM se cae al iniciar (incompatibilidad SWT/GTK, problemas de classloader, dependencias faltantes)
+- El sitio de actualizaciones (`http://descargas.sri.gov.ec/dimm/updates`) no funciona — no se pueden instalar extensiones
+- Java 6-8 están obsoletos y no están disponibles en distribuciones modernas
+- Eclipse 3.3 RCP no puede resolver plugins compilados para Java 21
 
-This migration solves every layer of that stack: bytecode patches, dependency injection, OSGi configuration, SWT/GTK compatibility, and a replacement for the dead update site.
+Esta migración resuelve cada capa del problema: parches de bytecode, inyección de dependencias, configuración OSGi, compatibilidad SWT/GTK, y un reemplazo para el sitio de actualizaciones caído.
 
-## What was done
+## Qué se hizo
 
-| Problem | Solution |
-|---------|----------|
-| SWT/GTK crashes with certain themes | `GTK2_RC_FILES=Raleigh` or `GDK_BACKEND=x11` |
-| Java 6-8 → Java 21 | Equinox launcher, `--add-opens`, custom `JavaSE-21.profile` |
-| `Bundle-RequiredExecutionEnvironment` rejects Java 21 | Auto-fix Python script in `dimm.sh` strips incompatible BREE values on every startup |
-| Update site `descargas.sri.gov.ec/dimm/updates` is dead | **Internet download reimplemented**: scrapea `www.sri.gob.ec/formularios-e-instructivos1`, muestra lista seleccionable de plugins con versión, descarga el zip desde `descargas.sri.gob.ec/download/anexos/...`, extrae e instala |
-| Missing databinding + nebula calendar widgets | Bundled manually into `plugins/` |
-| Spring context fails across OSGi bundles | **SpringContextHelper** scans for `applicationContext*.xml` files, returns `file:` URLs bypassing OSGi classloader; **Eclipse-RegisterBuddy** policy for cross-bundle class visibility |
-| `File.delete()` fails on non-empty directories | Patched to `deleteDirectory()` recursive |
-| Feature JARs not readable as directories | Auto-extract `features/*.jar` → directory on startup |
-| Orphan plugins after uninstall | Auto-cleanup on startup removes plugins not referenced by any installed feature |
+| Problema | Solución |
+|----------|----------|
+| SWT/GTK se cuelga con ciertos temas | `GTK2_RC_FILES=Raleigh` o `GDK_BACKEND=x11` |
+| Java 6-8 → Java 21 | Equinox launcher, `--add-opens`, perfil `JavaSE-21.profile` personalizado |
+| `Bundle-RequiredExecutionEnvironment` rechaza Java 21 | Script Python en `dimm.sh` elimina valores BREE incompatibles al iniciar |
+| Sitio de actualizaciones caído | **Descarga por Internet reimplementada**: extrae la lista de `www.sri.gob.ec/formularios-e-instructivos1`, muestra los plugins disponibles con versión, descarga el zip desde `descargas.sri.gob.ec/download/anexos/...`, lo extrae y lo instala |
+| Faltan widgets de calendario (databinding + nebula) | Copiados manualmente a `plugins/` |
+| Spring context falla entre bundles OSGi | **SpringContextHelper** busca archivos `applicationContext*.xml`, retorna URLs `file:` evitando el classloader OSGi; política **Eclipse-RegisterBuddy** para visibilidad entre bundles |
+| `File.delete()` falla en directorios no vacíos | Reemplazado por `deleteDirectory()` recursivo |
+| Features en JAR no se leen como directorios | Extracción automática de `features/*.jar` a directorios al iniciar |
+| Plugins huérfanos tras desinstalar | Limpieza automática al iniciar elimina plugins no referenciados por ningún feature instalado |
 
-## Quick start
+## Inicio rápido
 
 ```bash
-cd /path/to/DIMM-Linux
+cd /ruta/a/DIMM-Linux
 ./dimm.sh
 ```
 
-### Install a plugin
+### Instalar un plugin
 
-- **From a local zip**: Programa → Agregar Nuevos Programas → Instalación por archivo
-- **From the internet**: Programa → Agregar Nuevos Programas → Instalación por Internet → seleccionar de la lista de plugins disponibles → descarga e instala automáticamente
+- **Desde un zip local**: Programa → Agregar Nuevos Programas → Instalación por archivo
+- **Desde internet**: Programa → Agregar Nuevos Programas → Instalación por Internet → seleccionar de la lista de plugins disponibles → descarga e instala automáticamente
 
-### Uninstall a plugin
+### Desinstalar un plugin
 
-Programa → Desinstalar Programas → select → OK → restarts automatically.
+Programa → Desinstalar Programas → seleccionar → OK → reinicia automáticamente.
 
-## SRI plugins
+## Plugins SRI
 
-All plugins are downloaded directly from SRI (Servicio de Rentas Internas) via the **Instalación por Internet** feature at `https://www.sri.gob.ec/formularios-e-instructivos1`. The repository does not bundle any SRI plugin binaries — they are installed by the user at runtime.
+Todos los plugins se descargan directamente del SRI mediante la función **Instalación por Internet** desde `https://www.sri.gob.ec/formularios-e-instructivos1`. El repositorio no incluye ningún plugin SRI — se instalan en tiempo de ejecución por el usuario.
 
-## Technical stack
+## Stack técnico
 
-- **Eclipse 3.3** (Equinox OSGi) — RCP base from 2007
-- **Java 21** — modern LTS with `--add-opens` for reflective access
-- **SWT/GTK** — native Linux widgets via GTK2 backend
-- **Spring 2.5 + Hibernate 3** — legacy framework used by RDEP, DP, and core
-- **ASM 9** — bytecode manipulation for patching compiled classes without source
-- **Zip4j** — zip extraction for plugin installation
+- **Eclipse 3.3** (Equinox OSGi) — base RCP de 2007
+- **Java 21** — LTS moderno con `--add-opens` para acceso reflectivo
+- **SWT/GTK** — widgets nativos de Linux mediante backend GTK2
+- **Spring 2.5 + Hibernate 3** — framework legacy usado por RDEP, DP y core
+- **ASM 9** — manipulación de bytecode para parchar clases compiladas sin fuente
+- **Zip4j** — extracción de zip para instalación de plugins
 
-## License
+## Licencia
 
 - **Eclipse RCP 3.3** — [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
-- **DIMM plugins** by **Servicio de Rentas Internas del Ecuador (SRI)** — LGPL per ATS feature
-- Migration patches — provided under the same license as the original project
+- **Plugins DIMM** por **Servicio de Rentas Internas del Ecuador (SRI)** — LGPL según feature ATS
+- **Parches de migración** — bajo la misma licencia del proyecto original
 
-## Links
+## Enlaces
 
-- [GitHub repository](https://github.com/cristobalmontenegro/Dimm-Linux)
-- SRI plugin downloads: `https://descargas.sri.gob.ec/download/anexos/{name}/{filename}.zip`
+- [Repositorio GitHub](https://github.com/cristobalmontenegro/Dimm-Linux)
+- Descargas de plugins SRI: `https://descargas.sri.gob.ec/download/anexos/{nombre}/{archivo}.zip`
