@@ -46,26 +46,9 @@ cd /path/to/DIMM-Linux
 
 Programa → Desinstalar Programas → select → OK → restarts automatically.
 
-## SRI plugins included in PLUGINSSRI/
+## SRI plugins
 
-| Plugin | File |
-|--------|------|
-| ACA | `aca.1.0.1.zip` |
-| ADI | `adi_1.6.0.zip` |
-| AFIC | `AFIC.1.1.0.zip` |
-| ANR | `anr_1_2(4).zip` |
-| ATS | `ats.plugin.1.15.0.zip` |
-| devIVA | `devIVA.zip` |
-| DIMM-ABT | `dimm-abt.1.1.11.zip` |
-| DIMM-APS | `dimm-aps.2.5.0.zip` |
-| DIMM-MID Plugin | `dimm-mid-plugin-v1.7.0.zip` |
-| DIMM-MID Validador | `dimm-mid-validador-v1.7.0.zip` |
-| DIMM-RDEP | `dimm-rdep-plugin-v3.19.0.zip` |
-| DP | `dp_v2.3.2.zip` |
-| ICE | `ice.1.5.0.zip` |
-| OPRE | `opre_1_0_15.zip` |
-| REOC | `reoc_2_0_4.zip` |
-| Validador Consola | `validador-consola-inst-3.0.2.jar` |
+All plugins are downloaded directly from SRI (Servicio de Rentas Internas) via the **Instalación por Internet** feature at `https://www.sri.gob.ec/formularios-e-instructivos1`. The repository does not bundle any SRI plugin binaries — they are installed by the user at runtime.
 
 ## Technical stack
 
