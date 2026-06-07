@@ -13,7 +13,7 @@ Hacer que DIMM (Eclipse 3.3 RCP + plugins SRI) funcione con Java 21 en Linux (GT
 - **FeatureXmlReader** — helper class que lee `feature.xml` desde directorio O desde JAR (fallback), usada por el auto-cleanup de dimm.sh
 - **GitHub**: https://github.com/cristobalmontenegro/Dimm-Linux
 - **ADI e ICE** instalados y funcionando
-- **"Agregar desde Internet" arreglado** ✅ — `ActualizacionDialog$4` reemplazado para descargar zips desde URL en vez de usar update site SRI caído
+- **"Agregar desde Internet" arreglado** ✅ — `ActualizacionDialog$4` reemplazado para descargar zips desde URL directa (`descargas.sri.gob.ec`) en vez del update site Eclipse que ya no responde
 - **Spring context multi-plugin**: `createContext()` reescrito vía ASM para usar `SpringContextHelper.findAllContextFiles()`
   - Escanea `plugins/*/applicationContext*.xml` y retorna paths `file:` absolutos
   - `ClassPathXmlApplicationContext` procesa `file:` URLs como `UrlResource`, bypassing classloader OSGi
@@ -30,12 +30,12 @@ Hacer que DIMM (Eclipse 3.3 RCP + plugins SRI) funcione con Java 21 en Linux (GT
 ## Cómo se logró el menú ATS
 
 ### Problema original
-Los plugins ATS requieren `org.eclipse.nebula.widgets.cdatetime` (widget de calendario), que a su vez requiere databinding 1.4.0+. Esos JARs no vienen con DIMM; el instalador los descarga del update site SRI, pero el servidor SRI ya no existe. Además, los JARs tienen `Bundle-RequiredExecutionEnvironment` con valores antiguos (CDC-1.1/Foundation-1.1, J2SE-1.4, J2SE-1.5, JavaSE-1.6) que Equinox 3.3 no resuelve en Java 21.
+Los plugins ATS requieren `org.eclipse.nebula.widgets.cdatetime` (widget de calendario), que a su vez requiere databinding 1.4.0+. Esos JARs no vienen con DIMM; el instalador original los descargaba del update site Eclipse (`http://descargas.sri.gov.ec/dimm/updates`), pero ese servidor ya no responde (el formato update site está descontinuado). Sin embargo, los zips individuales de cada plugin SÍ están disponibles en `https://descargas.sri.gob.ec/download/anexos/...`. Además, los JARs tienen `Bundle-RequiredExecutionEnvironment` con valores antiguos (CDC-1.1/Foundation-1.1, J2SE-1.4, J2SE-1.5, JavaSE-1.6) que Equinox 3.3 no resuelve en Java 21.
 
 ### Solución: 3 pasos
 
 #### 1. JARs faltantes
-Los JARs de databinding 1.4.0+ y nebula cdatetime se obtuvieron del update site de ATS (`temp/plugins/`, ya descargados antes de que el servidor cayera). Se copiaron a `plugins/` para que Equinox los vea.
+Los JARs de databinding 1.4.0+ y nebula cdatetime se copiaron manualmente a `plugins/` (obtenidos desde `temp/plugins/`, descargados previamente del update site SRI antes de que dejara de responder).
 
 #### 2. BREE eliminado
 Se quitó `Bundle-RequiredExecutionEnvironment` de 12 JARs problemáticos:
