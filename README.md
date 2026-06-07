@@ -23,7 +23,7 @@ This migration solves every layer of that stack: bytecode patches, dependency in
 | SWT/GTK crashes with certain themes | `GTK2_RC_FILES=Raleigh` or `GDK_BACKEND=x11` |
 | Java 6-8 → Java 21 | Equinox launcher, `--add-opens`, custom `JavaSE-21.profile` |
 | `Bundle-RequiredExecutionEnvironment` rejects Java 21 | Auto-fix Python script in `dimm.sh` strips incompatible BREE values on every startup |
-| Update site `descargas.sri.gov.ec/dimm/updates` is dead | **Internet download reimplemented**: paste a direct zip URL (`descargas.sri.gob.ec/download/anexos/...`) → downloads, extracts, installs |
+| Update site `descargas.sri.gov.ec/dimm/updates` is dead | **Internet download reimplemented**: scrapea `www.sri.gob.ec/formularios-e-instructivos1`, muestra lista seleccionable de plugins con versión, descarga el zip desde `descargas.sri.gob.ec/download/anexos/...`, extrae e instala |
 | Missing databinding + nebula calendar widgets | Bundled manually into `plugins/` |
 | Spring context fails across OSGi bundles | **SpringContextHelper** scans for `applicationContext*.xml` files, returns `file:` URLs bypassing OSGi classloader; **Eclipse-RegisterBuddy** policy for cross-bundle class visibility |
 | `File.delete()` fails on non-empty directories | Patched to `deleteDirectory()` recursive |
@@ -39,8 +39,8 @@ cd /path/to/DIMM-Linux
 
 ### Install a plugin
 
-- **From a local zip**: Programa → Agregar Nuevos Programas → Actualización por archivo
-- **From the internet**: Programa → Agregar Nuevos Programas → Actualización por Internet → paste a direct zip URL from `https://descargas.sri.gob.ec/download/anexos/...`
+- **From a local zip**: Programa → Agregar Nuevos Programas → Instalación por archivo
+- **From the internet**: Programa → Agregar Nuevos Programas → Instalación por Internet → seleccionar de la lista de plugins disponibles → descarga e instala automáticamente
 
 ### Uninstall a plugin
 

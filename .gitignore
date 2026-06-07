@@ -12,3 +12,6 @@ configuration/org.eclipse.update/history/
 configuration/org.eclipse.update/last.config.stamp
 configuration/*.log
 DimmDb/
+descargas/
+Patch*.class
+Patch*.java
