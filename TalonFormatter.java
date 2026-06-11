@@ -123,14 +123,16 @@ public class TalonFormatter {
         int maxCols = 0;
         for (List<String> r : rows) maxCols = Math.max(maxCols, r.size());
 
-        // Find header row: skip section titles (colspan with 1 non-empty cell)
-        int headerRow = headerRows.get(0);
+        // Filter section titles out of headerRows, keep only real column headers
+        List<Integer> realHeaders = new ArrayList<>();
         for (int idx : headerRows) {
             List<String> r = rows.get(idx);
             int nonEmpty = 0;
             for (String v : r) if (!v.isEmpty()) nonEmpty++;
-            if (nonEmpty >= 2 || r.size() < maxCols) { headerRow = idx; break; }
+            if (nonEmpty >= 2 || r.size() < maxCols) realHeaders.add(idx);
         }
+
+        int headerRow = realHeaders.isEmpty() ? 0 : realHeaders.get(0);
 
         int[] widths = new int[maxCols];
         for (int ri = 0; ri < rows.size(); ri++) {
