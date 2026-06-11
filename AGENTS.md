@@ -3,7 +3,7 @@
 ## Objetivo
 Hacer que DIMM (Eclipse 3.3 RCP + plugins SRI) funcione con Java 21 en Linux (GTK).
 
-## Estado actual (10 Jun 2026) ✅
+## Estado actual (11 Jun 2026) ✅
 - **DIMM arranca** con Java 21 + Equinox launcher
 - **Menú ATS** funciona (Herramientas ATS visible y operativo)
 - **Gestión de plugins** funcional (instalar/desinstalar vía Programa, Agregar/Desinstalar)
@@ -27,7 +27,8 @@ Hacer que DIMM (Eclipse 3.3 RCP + plugins SRI) funcione con Java 21 en Linux (GT
   - TCCL setea al classloader del principal (`BeanFactory.class`)
   - `Eclipse-RegisterBuddy: ec.gov.sri.dimm.principal` agregado a RDEP, DP y Comun → el principal puede ver sus clases vía buddy policy
 - **SpringContextHelper** creado y agregado a `ec.gov.sri.dimm.principal.util`
-- **Talón Resumen funcional** ✅ — `EditorTalonATS` parcheado vía ASM: reemplaza el widget `Browser` (que requiere XULRunner/WebKitGTK 1.0, no disponible en Linux moderno) por `StyledText` con fuente monospace (`Monospace` vía `TalonFormatter.setMonospaceFont()` con reflection). Muestra tablas HTML formateadas como texto con columnas separadas por `|`. El botón "Imprimir" queda como no-op (SelectionAdapter vacío).
+- **Talón Resumen funcional** ✅ — `EditorTalonATS` parcheado vía ASM: reemplaza el widget `Browser` por `StyledText` con fuente monospace. Muestra tablas HTML formateadas como texto con columnas alineadas, guiones bajo encabezados y títulos de sección como texto plano. El botón "Imprimir" queda como no-op.
+- **GenericBrowserPatcher** ✅ — Escanea TODOS los JARs en `plugins/` al arrancar y reemplaza `Browser` por `StyledText` + `TalonFormatter` en cualquier clase que use Browser. Cubre plugins nuevos o existentes que generen talones/resúmenes HTML.
 
 ## Problema original de Spring
 - Los plugins RDEP, DP y Comun requieren Spring context con beans propios + beans del principal (dataSource, sessionFactory, abstract-tx-bean)
@@ -93,6 +94,8 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 4. **Probar los otros plugins SRI**: ACA, AFIC, ANR, ABT, APS, MID, OPRE, REOC, ValidadorConsola.
 5. **Verificar labels contextuales**: `nuevaExtension=true` debe decir "Instalación por Internet/archivo", `nuevaExtension=false` debe decir "Actualización por Internet/archivo".
 6. ~~**Probar Talón Resumen**~~ ✅ — Tablas visibles con columnas pipe-separadas y fuente monospace.
+7. **Probar GenericBrowserPatcher con otros plugins**: instalar RDEP, ICE, ADI, etc. y verificar que sus talones/resúmenes se muestren correctamente con StyledText + TalonFormatter (sin Browser).
+8. **Probar desinstalar/reinstalar ATS con GenericBrowserPatcher**: verificar que tras reinstalar ATS desde el SRI, el generic patcher lo parchee automáticamente (el ats.ui JAR original tiene Browser, el generic patcher debe reemplazarlo).
 
 ## Archivos relevantes
 - `dimm.sh`: lanzador + autocorrección BREE + autoextracción features + autolimpieza huérfanos + flags Java 21
@@ -115,7 +118,9 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 - `PatchValidarATSHandler.class`, `PatchValidarATSHandler$1.class`, `PatchValidarATSHandler$Patcher.class`: clases pre-compiladas para el auto-patch desde `dimm.sh`.
 - `PatchEditorTalonATS.java`: script ASM para parchear `EditorTalonATS` — reemplaza `Browser` por `StyledText`, inyecta `setMonospaceFont()` (font Monospace via reflection), agrega `readFileContent(File)` sintético que delega a `TalonFormatter`. Incluye soporte para parchear JARs directamente.
 - `PatchEditorTalonATS.class`, `PatchEditorTalonATS$1.class`, `PatchEditorTalonATS$2.class`, `PatchEditorTalonATS$2$1.class`, `PatchEditorTalonATS$Access0Patcher.class`, `PatchEditorTalonATS$CreatePartControlPatcher.class`, `PatchEditorTalonATS$SetFocusPatcher.class`: clases pre-compiladas para el auto-patch desde `dimm.sh`.
-- `TalonFormatter.java`: fuente de la clase utilitaria para formateo del talón resumen. Usa reflection para `setMonospaceFont(Object)` (evita dependencia SWT en tiempo de compilación).
+- `TalonFormatter.java`: fuente de la clase utilitaria para formateo del talón resumen.
 - `TalonFormatter.class`, `ec/gob/sri/dimm/ats/ui/editores/TalonFormatter.class`: clases compiladas, inyectadas en el JAR vía auto-patch.
+- `GenericBrowserPatcher.java`: patcher ASM genérico que escanea todos los JARs en `plugins/` y reemplaza `Browser` por `StyledText` + `TalonFormatter` en cualquier clase que referencie `org.eclipse.swt.browser.Browser`. Detecta y parchea automáticamente `setUrl`, `add*Listener`, `setFocus`, `back`, `forward`, `refresh`, `getUrl`, etc. Inyecta `TalonFormatter.class` y métodos `readFileContent(String)` y `readFileContent(File)` sintéticos en cada JAR parcheado.
+- `GenericBrowserPatcher.class`, `GenericBrowserPatcher$ClassPatcher.class`, `GenericBrowserPatcher$MethodPatcher.class`, `GenericBrowserPatcher$SetFocusPatcher.class`: clases pre-compiladas para el auto-patch desde `dimm.sh`.
 - `asm.jar`: biblioteca ASM 9 para parches de bytecode.
 - `/tmp/dimm-debug.log`: stderr de JVM
