@@ -78,27 +78,60 @@ public class TalonFormatter {
 
     static String formatTable(String tableHtml) {
         List<List<String>> rows = new ArrayList<>();
+        List<Integer> headerRows = new ArrayList<>();
         Matcher rm = Pattern.compile("(?i)<tr[^>]*>(.*?)</tr>").matcher(tableHtml);
         while (rm.find()) {
             String rc = rm.group(1);
             List<String> cells = new ArrayList<>();
-            Matcher cm = Pattern.compile("(?i)<t[hd]([^>]*)>(.*?)</t[hd]>").matcher(rc);
+            boolean hasTH = false;
+            Matcher cm = Pattern.compile("(?i)<(t[hd])([^>]*)>(.*?)</\\1>").matcher(rc);
             while (cm.find()) {
-                String attrs = cm.group(1);
-                String raw = cm.group(2).replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
+                String tag = cm.group(1);
+                String attrs = cm.group(2);
+                String raw = cm.group(3).replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
                 String decoded = decodeEntities(raw);
+                if ("th".equalsIgnoreCase(tag)) hasTH = true;
                 int colspan = 1;
                 Matcher colM = Pattern.compile("(?i)colspan\\s*=\\s*\"?(\\d+)\"?").matcher(attrs);
                 if (colM.find()) colspan = Integer.parseInt(colM.group(1));
                 cells.add(decoded);
                 for (int i = 1; i < colspan; i++) cells.add("");
             }
-            if (!cells.isEmpty()) rows.add(cells);
+            if (!cells.isEmpty()) {
+                rows.add(cells);
+                if (hasTH) headerRows.add(rows.size() - 1);
+            }
         }
         if (rows.isEmpty()) return processText(tableHtml);
 
+        // Layout table (no <th>): simple text rows, no dashes
+        if (headerRows.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (List<String> r : rows) {
+                List<String> nonEmpty = new ArrayList<>();
+                for (String v : r) if (!v.isEmpty()) nonEmpty.add(v);
+                if (nonEmpty.isEmpty()) continue;
+                for (int c = 0; c < nonEmpty.size(); c++) {
+                    if (c > 0) sb.append("  ");
+                    sb.append(nonEmpty.get(c));
+                }
+                sb.append('\n');
+            }
+            return sb.toString();
+        }
+
         int maxCols = 0;
         for (List<String> r : rows) maxCols = Math.max(maxCols, r.size());
+
+        // Find header row: skip section titles (colspan with 1 non-empty cell)
+        int headerRow = headerRows.get(0);
+        for (int idx : headerRows) {
+            List<String> r = rows.get(idx);
+            int nonEmpty = 0;
+            for (String v : r) if (!v.isEmpty()) nonEmpty++;
+            if (nonEmpty >= 2 || r.size() < maxCols) { headerRow = idx; break; }
+        }
+
         int[] widths = new int[maxCols];
         for (List<String> r : rows) {
             for (int c = 0; c < r.size(); c++) {
@@ -108,7 +141,8 @@ public class TalonFormatter {
 
         boolean[] numCol = new boolean[maxCols];
         Arrays.fill(numCol, true);
-        for (int ri = 1; ri < rows.size(); ri++) {
+        for (int ri = 0; ri < rows.size(); ri++) {
+            if (ri == headerRow) continue;
             List<String> r = rows.get(ri);
             for (int c = 0; c < r.size(); c++) {
                 String v = r.get(c);
@@ -119,6 +153,16 @@ public class TalonFormatter {
         StringBuilder sb = new StringBuilder();
         for (int ri = 0; ri < rows.size(); ri++) {
             List<String> r = rows.get(ri);
+
+            // Section title rows (colspan covering all cols, 1 non-empty cell): plain text
+            int nonEmpty = 0;
+            for (String v : r) if (!v.isEmpty()) nonEmpty++;
+            if (nonEmpty <= 1 && r.size() == maxCols) {
+                for (String v : r) if (!v.isEmpty()) { sb.append(v); break; }
+                sb.append('\n');
+                continue;
+            }
+
             for (int c = 0; c < maxCols; c++) {
                 if (c > 0) sb.append("  ");
                 String val = c < r.size() ? r.get(c) : "";
@@ -131,7 +175,8 @@ public class TalonFormatter {
                 }
             }
             sb.append('\n');
-            if (ri == 0) {
+
+            if (ri == headerRow) {
                 for (int c = 0; c < maxCols; c++) {
                     if (c > 0) sb.append("  ");
                     for (int p = 0; p < widths[c]; p++) sb.append('-');
