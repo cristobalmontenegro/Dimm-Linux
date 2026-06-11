@@ -92,7 +92,7 @@ public class TalonFormatter {
                 String decoded = decodeEntities(raw);
                 if ("th".equalsIgnoreCase(tag)) hasTH = true;
                 int colspan = 1;
-                Matcher colM = Pattern.compile("(?i)colspan\\s*=\\s*\"?(\\d+)\"?").matcher(attrs);
+                Matcher colM = Pattern.compile("(?i)colspan\\s*=\\s*['\"]?(\\d+)['\"]?").matcher(attrs);
                 if (colM.find()) colspan = Integer.parseInt(colM.group(1));
                 cells.add(decoded);
                 for (int i = 1; i < colspan; i++) cells.add("");
@@ -123,13 +123,13 @@ public class TalonFormatter {
         int maxCols = 0;
         for (List<String> r : rows) maxCols = Math.max(maxCols, r.size());
 
-        // Filter section titles out of headerRows, keep only real column headers
+        // Filter section titles (1 non-empty cell) out of headerRows
         List<Integer> realHeaders = new ArrayList<>();
         for (int idx : headerRows) {
             List<String> r = rows.get(idx);
             int nonEmpty = 0;
             for (String v : r) if (!v.isEmpty()) nonEmpty++;
-            if (nonEmpty >= 2 || r.size() < maxCols) realHeaders.add(idx);
+            if (nonEmpty >= 2) realHeaders.add(idx);
         }
 
         int headerRow = realHeaders.isEmpty() ? 0 : realHeaders.get(0);
@@ -139,8 +139,7 @@ public class TalonFormatter {
             List<String> r = rows.get(ri);
             int nonEmpty = 0;
             for (String v : r) if (!v.isEmpty()) nonEmpty++;
-            boolean isSection = nonEmpty <= 1 && r.size() == maxCols;
-            if (isSection) continue;
+            if (nonEmpty <= 1) continue;
             for (int c = 0; c < r.size(); c++) {
                 widths[c] = Math.max(widths[c], r.get(c).length());
             }
@@ -161,10 +160,10 @@ public class TalonFormatter {
         for (int ri = 0; ri < rows.size(); ri++) {
             List<String> r = rows.get(ri);
 
-            // Section title rows (colspan covering all cols, 1 non-empty cell): plain text
+            // Section title rows (1 non-empty cell spanning all cols): plain text
             int nonEmpty = 0;
             for (String v : r) if (!v.isEmpty()) nonEmpty++;
-            if (nonEmpty <= 1 && r.size() == maxCols) {
+            if (nonEmpty <= 1) {
                 for (String v : r) if (!v.isEmpty()) { sb.append(v); break; }
                 sb.append('\n');
                 continue;
