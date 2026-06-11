@@ -27,7 +27,7 @@ Hacer que DIMM (Eclipse 3.3 RCP + plugins SRI) funcione con Java 21 en Linux (GT
   - TCCL setea al classloader del principal (`BeanFactory.class`)
   - `Eclipse-RegisterBuddy: ec.gov.sri.dimm.principal` agregado a RDEP, DP y Comun → el principal puede ver sus clases vía buddy policy
 - **SpringContextHelper** creado y agregado a `ec.gov.sri.dimm.principal.util`
-- **Talón Resumen funcional** ✅ — `EditorTalonATS` parcheado vía ASM: reemplaza el widget `Browser` (que requiere XULRunner/WebKitGTK 1.0, no disponible en Linux moderno) por `StyledText` que muestra el HTML del talón resumen con etiquetas removidas. El botón "Imprimir" queda como no-op (SelectionAdapter vacío).
+- **Talón Resumen funcional** ✅ — `EditorTalonATS` parcheado vía ASM: reemplaza el widget `Browser` (que requiere XULRunner/WebKitGTK 1.0, no disponible en Linux moderno) por `StyledText` con fuente monospace (`Monospace` vía `TalonFormatter.setMonospaceFont()` con reflection). Muestra tablas HTML formateadas como texto con columnas separadas por `|`. El botón "Imprimir" queda como no-op (SelectionAdapter vacío).
 
 ## Problema original de Spring
 - Los plugins RDEP, DP y Comun requieren Spring context con beans propios + beans del principal (dataSource, sessionFactory, abstract-tx-bean)
@@ -75,7 +75,7 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 - **Autoextracción de feature JARs**: script Python en `dimm.sh` que extrae `features/*.jar` a directorios (elimina el JAR) para que `getPluginFiles()` pueda leer `feature.xml`.
 - **Autolimpieza de plugins huérfanos**: script Python en `dimm.sh` que al arrancar elimina de `plugins/` todo bundle OSGi que no esté referenciado por ningún feature en `platform.xml` (excepto lista blanca de core). También limpia entradas obsoletas del registro.
 - **Auto-patch ValidarATSHandler**: `dimm.sh` ejecuta `PatchValidarATSHandler` (vía ASM) sobre `ec.gob.sri.dimm.ats.ui_1.2.0.jar` al arrancar. Si el JAR ya está parcheado (detecta bytes `DUP; ASTORE 12`), lo salta. Esto asegura que tras reinstalar el plugin ATS desde el SRI, el fix se aplique automáticamente.
-- **Auto-patch EditorTalonATS**: `dimm.sh` ejecuta `PatchEditorTalonATS` (vía ASM) sobre el mismo JAR al arrancar. Reemplaza `Browser` por `StyledText` en `EditorTalonATS` y vacía el `widgetSelected` de la clase interna `$1`. El parche se salta si ya está aplicado (detecta `StyledText` en el classfile).
+- **Auto-patch EditorTalonATS**: `dimm.sh` ejecuta `PatchEditorTalonATS` (vía ASM) sobre el mismo JAR al arrancar. Reemplaza `Browser` por `StyledText` en `EditorTalonATS`, inyecta llamada a `TalonFormatter.setMonospaceFont()` (font monospace vía reflection) y vacía el `widgetSelected` de la clase interna `$1`. El parche se salta si ya está aplicado (detecta `setMonospaceFont` en el classfile).
 
 ## Problemas conocidos
 1. **SWT/GTK crash con ciertos temas** — usar `GTK2_RC_FILES=Raleigh` o `GDK_BACKEND=x11`.
@@ -84,7 +84,7 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 4. **UninstallDialog.getPluginFiles() no lee feature.xml desde JARs** ⚠️ — si el feature se instaló como `features/*.jar` (no directorio), `new File(featureDir, "feature.xml").exists()` falla y retorna lista vacía. Solución parcial: dimm.sh extrae JARs a directorios al arrancar, y el auto-cleanup elimina huérfanos. Para el caso install→uninstall en misma sesión (sin restart), el cleanup corre al siguiente arranque.
 5. **UninstallDialog.deleteDirectory() parcheado** ✅ — reemplaza `File.delete()` que falla en directorios no vacíos por `deleteDirectory()` recursivo.
 6. **SpringContextHelper$1.class faltante** ✅ resuelto — al compilar `SpringContextHelper.java` (que usa un `FilenameFilter` anónimo), no se copió `SpringContextHelper$1.class` al plugin. Causaba `ClassNotFoundException` al intentar crear RUC o cualquier wizard que cargue el Spring context. Se recompiló y desplegaron ambos class files.
-7. ~~**Pestaña Talón Resumen no muestra contenido**~~ ✅ — `Browser` de SWT 3.3 requiere Mozilla XULRunner o WebKitGTK 1.0 (obsoletos). Se reemplazó por `StyledText` vía ASM: lee el HTML del archivo, remueve etiquetas con regex, colapsa espacios y lo muestra como texto plano. El botón "Imprimir" queda deshabilitado (no-op).
+7. ~~**Pestaña Talón Resumen no muestra contenido**~~ ✅ — `Browser` de SWT 3.3 requiere Mozilla XULRunner o WebKitGTK 1.0 (obsoletos). Se reemplazó por `StyledText` vía ASM con fuente monospace (`Monospace`). `TalonFormatter` procesa tablas HTML como pipe-separado, decodifica entidades y remueve tags. El botón "Imprimir" queda deshabilitado (no-op).
 
 ## Tareas pendientes (prioridad del usuario)
 1. ~~**Validación ATS**~~ ✅ — `ValidarATSHandler` parcheado vía ASM para guardar y reusar `IWorkbenchWindow` (ver sección "Estado actual").
@@ -92,7 +92,7 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 3. **Probar flujo completo RDEP**: instalar → restart → desinstalar → restart → verificar que RDEP desaparezca (plugins + menú).
 4. **Probar los otros plugins SRI**: ACA, AFIC, ANR, ABT, APS, MID, OPRE, REOC, ValidadorConsola.
 5. **Verificar labels contextuales**: `nuevaExtension=true` debe decir "Instalación por Internet/archivo", `nuevaExtension=false` debe decir "Actualización por Internet/archivo".
-6. **Probar Talón Resumen**: instalar ATS, generar talón, abrir pestaña Talón Resumen y verificar que muestre el contenido como texto plano (StyledText).
+6. ~~**Probar Talón Resumen**~~ ✅ — Tablas visibles con columnas pipe-separadas y fuente monospace.
 
 ## Archivos relevantes
 - `dimm.sh`: lanzador + autocorrección BREE + autoextracción features + autolimpieza huérfanos + flags Java 21
@@ -113,7 +113,9 @@ Se agregó un script Python al inicio de `dimm.sh` que escanea todos los JARs y 
 - `plugins/ec.gov.sri.dimm.comun_1.0.1/META-INF/MANIFEST.MF`: `Eclipse-RegisterBuddy`
 - `PatchValidarATSHandler.java`: script ASM para parchear `ValidarATSHandler` — guarda el `IWorkbenchWindow` en var 12 tras la primera llamada y reemplaza las llamadas subsiguientes por `ALOAD 12`. Incluye soporte para parchear JARs directamente.
 - `PatchValidarATSHandler.class`, `PatchValidarATSHandler$1.class`, `PatchValidarATSHandler$Patcher.class`: clases pre-compiladas para el auto-patch desde `dimm.sh`.
-- `PatchEditorTalonATS.java`: script ASM para parchear `EditorTalonATS` — reemplaza `Browser` por `StyledText`, agrega `readFileContent(File)` sintético que lee y limpia HTML. Incluye soporte para parchear JARs directamente.
+- `PatchEditorTalonATS.java`: script ASM para parchear `EditorTalonATS` — reemplaza `Browser` por `StyledText`, inyecta `setMonospaceFont()` (font Monospace via reflection), agrega `readFileContent(File)` sintético que delega a `TalonFormatter`. Incluye soporte para parchear JARs directamente.
 - `PatchEditorTalonATS.class`, `PatchEditorTalonATS$1.class`, `PatchEditorTalonATS$2.class`, `PatchEditorTalonATS$2$1.class`, `PatchEditorTalonATS$Access0Patcher.class`, `PatchEditorTalonATS$CreatePartControlPatcher.class`, `PatchEditorTalonATS$SetFocusPatcher.class`: clases pre-compiladas para el auto-patch desde `dimm.sh`.
+- `TalonFormatter.java`: fuente de la clase utilitaria para formateo del talón resumen. Usa reflection para `setMonospaceFont(Object)` (evita dependencia SWT en tiempo de compilación).
+- `TalonFormatter.class`, `ec/gob/sri/dimm/ats/ui/editores/TalonFormatter.class`: clases compiladas, inyectadas en el JAR vía auto-patch.
 - `asm.jar`: biblioteca ASM 9 para parches de bytecode.
 - `/tmp/dimm-debug.log`: stderr de JVM

@@ -14,5 +14,4 @@ DimmDb/
 descargas/
 temp/
 PLUGINSSRI/
-Patch*.class
-Patch*.java
+# Patch files are tracked (needed by dimm.sh for auto-patch)

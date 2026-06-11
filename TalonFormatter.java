@@ -6,6 +6,23 @@ import java.util.*;
 import java.util.regex.*;
 
 public class TalonFormatter {
+    public static void setMonospaceFont(Object text) {
+        try {
+            Class<?> st = text.getClass();
+            Object font = st.getMethod("getFont").invoke(text);
+            Object[] fd = (Object[]) font.getClass().getMethod("getFontData").invoke(font);
+            fd[0].getClass().getMethod("setName", String.class).invoke(fd[0], "Monospace");
+            Object disp = st.getMethod("getDisplay").invoke(text);
+            Object f = Class.forName("org.eclipse.swt.graphics.Font")
+                .getConstructor(Class.forName("org.eclipse.swt.widgets.Display"),
+                    Class.forName("org.eclipse.swt.graphics.FontData"))
+                .newInstance(disp, fd[0]);
+            st.getMethod("setFont", Class.forName("org.eclipse.swt.graphics.Font")).invoke(text, f);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
     public static String readFileContent(File file) {
         try {
             String html = new String(Files.readAllBytes(file.toPath()));
