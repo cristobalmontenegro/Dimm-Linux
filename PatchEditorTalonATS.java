@@ -87,7 +87,7 @@ public class PatchEditorTalonATS {
     }
 
     static boolean isAlreadyPatched(byte[] data) {
-        return new String(data).contains("setMonospaceFont");
+        return new String(data).contains("setMonospaceFontV2");
     }
 
     static byte[] patchMainClass(byte[] classBytes) throws Exception {
@@ -185,6 +185,7 @@ public class PatchEditorTalonATS {
 
     static class CreatePartControlPatcher extends MethodVisitor {
         boolean skipPop = false;
+        boolean afterInit = false;
 
         CreatePartControlPatcher(MethodVisitor mv) {
             super(Opcodes.ASM9, mv);
@@ -212,10 +213,12 @@ public class PatchEditorTalonATS {
         public void visitFieldInsn(int opcode, String owner, String name, String desc) {
             if ("brwTalonResumen".equals(name) && (desc.contains("Browser") || desc.contains("StyledText"))) {
                 if (opcode == Opcodes.PUTFIELD) {
-                    mv.visitInsn(Opcodes.DUP_X1);
+                    afterInit = false;
                     super.visitFieldInsn(opcode, owner, name, "L" + STYLED_TEXT + ";");
+                    mv.visitVarInsn(Opcodes.ALOAD, 0);
+                    mv.visitFieldInsn(Opcodes.GETFIELD, owner, name, "L" + STYLED_TEXT + ";");
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC, FORMATTER_OWNER,
-                        "setMonospaceFont", "(Ljava/lang/Object;)V", false);
+                        "setMonospaceFontV2", "(Ljava/lang/Object;)V", false);
                     return;
                 }
                 super.visitFieldInsn(opcode, owner, name, "L" + STYLED_TEXT + ";");
@@ -226,11 +229,17 @@ public class PatchEditorTalonATS {
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-            if (opcode == Opcodes.INVOKESPECIAL && owner.equals(BROWSER) && "<init>".equals(name)) {
+            if (opcode == Opcodes.INVOKESPECIAL && "<init>".equals(name)
+                && (owner.equals(BROWSER) || owner.equals(STYLED_TEXT))) {
                 super.visitMethodInsn(Opcodes.INVOKESPECIAL, STYLED_TEXT, "<init>", desc, false);
+                afterInit = true;
                 return;
             }
             if (opcode == Opcodes.INVOKEVIRTUAL && owner.equals("java/io/File") && name.equals("getAbsolutePath")) {
+                return;
+            }
+            if (opcode == Opcodes.INVOKESTATIC && owner.equals(FORMATTER_OWNER)
+                && (name.equals("setMonospaceFont") || name.equals("setMonospaceFontV2"))) {
                 return;
             }
             if (opcode == Opcodes.INVOKEVIRTUAL && owner.equals(BROWSER) && name.equals("setUrl")) {
@@ -249,6 +258,10 @@ public class PatchEditorTalonATS {
         public void visitInsn(int opcode) {
             if (skipPop && opcode == Opcodes.POP) {
                 skipPop = false;
+                return;
+            }
+            if (afterInit && (opcode == Opcodes.DUP || opcode == Opcodes.DUP_X1)) {
+                afterInit = false;
                 return;
             }
             super.visitInsn(opcode);

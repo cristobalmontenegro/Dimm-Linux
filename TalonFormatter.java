@@ -6,7 +6,8 @@ import java.util.*;
 import java.util.regex.*;
 
 public class TalonFormatter {
-    public static void setMonospaceFont(Object text) {
+    public static void setMonospaceFont(Object text) { } // legacy stub
+    public static void setMonospaceFontV2(Object text) {
         try {
             Class<?> st = text.getClass();
             Object font = st.getMethod("getFont").invoke(text);
