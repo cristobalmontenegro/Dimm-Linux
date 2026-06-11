@@ -5,34 +5,33 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.regex.*;
 
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.SWT;
+
 public class TalonFormatter {
     public static void setMonospaceFont(Object text) { } // legacy stub
     public static void setMonospaceFontV2(Object text) {
         try {
-            Class<?> st = text.getClass();
-            Object disp = st.getMethod("getDisplay").invoke(text);
-            Object font = st.getMethod("getFont").invoke(text);
-            Object[] fd = (Object[]) font.getClass().getMethod("getFontData").invoke(font);
-            int height = 10;
-            try { height = (int) fd[0].getClass().getMethod("getHeight").invoke(fd[0]); } catch (Exception e) { }
-            if (height < 6 || height > 48) height = 10;
-            Class<?> fClass = Class.forName("org.eclipse.swt.graphics.Font");
-            Class<?> fdClass = Class.forName("org.eclipse.swt.graphics.FontData");
-            Class<?> dispClass = Class.forName("org.eclipse.swt.widgets.Display");
-            String[] fonts = {"Monospace", "Liberation Mono", "DejaVu Sans Mono",
+            StyledText st = (StyledText) text;
+            Display disp = st.getDisplay();
+            FontData oldFd = st.getFont().getFontData()[0];
+            int h = oldFd.getHeight();
+            if (h < 6 || h > 48) h = 10;
+            String[] names = {"Monospace", "Liberation Mono", "DejaVu Sans Mono",
                 "Courier New", "Courier 10 Pitch", "Bitstream Vera Sans Mono",
                 "Andale Mono", "FreeMono", "Luxi Mono", "DejaVu LGC Sans Mono",
                 "Noto Mono", "Droid Sans Mono", "Ubuntu Mono", "Menlo",
                 "Consolas", "Source Code Pro", "Monaco", "Inconsolata",
                 "Fira Code", "JetBrains Mono"};
-            for (String name : fonts) {
+            for (String name : names) {
                 try {
-                    Object newFd = fdClass.getConstructor(String.class, int.class, int.class)
-                        .newInstance(name, height, 0);
-                    Object f = fClass.getConstructor(dispClass, fdClass).newInstance(disp, newFd);
-                    st.getMethod("setFont", fClass).invoke(text, f);
+                    Font f = new Font(disp, name, h, SWT.NORMAL);
+                    st.setFont(f);
                     return;
-                } catch (Exception e2) { /* try next */ }
+                } catch (Exception e2) { }
             }
         } catch (Exception e) {
             System.err.println("[TalonFormatter] setMonospaceFontV2 error: " + e);

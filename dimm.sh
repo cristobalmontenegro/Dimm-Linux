@@ -242,7 +242,18 @@ jar_name = 'ec.gob.sri.dimm.ats.ui_1.2.0.jar'
 jar_path = os.path.join(plugins_dir, jar_name)
 if os.path.exists(jar_path):
     asm_jar = os.path.join(sys.argv[1], 'asm.jar')
-    cp = asm_jar + ':' + sys.argv[1]
+    swt_jar = os.path.join(plugins_dir, 'org.eclipse.swt.gtk.linux.x86_64_3.3.0.v3346.jar')
+    root = sys.argv[1]
+    formatter_src = os.path.join(root, 'TalonFormatter.java')
+    if os.path.exists(formatter_src) and os.path.exists(swt_jar):
+        r = subprocess.run(['javac', '-cp', swt_jar, '-d', root, formatter_src],
+            capture_output=True, text=True, timeout=30)
+        if r.returncode == 0:
+            print('  Compiled TalonFormatter.java')
+        elif r.stderr:
+            for line in r.stderr.strip().split('\n'):
+                if line: print(f'  [compile] {line}')
+    cp = asm_jar + ':' + root
     result = subprocess.run(
         ['java', '-cp', cp, 'PatchEditorTalonATS', jar_path],
         capture_output=True, text=True, timeout=30)
