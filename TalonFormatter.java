@@ -10,17 +10,26 @@ public class TalonFormatter {
     public static void setMonospaceFontV2(Object text) {
         try {
             Class<?> st = text.getClass();
+            Object disp = st.getMethod("getDisplay").invoke(text);
             Object font = st.getMethod("getFont").invoke(text);
             Object[] fd = (Object[]) font.getClass().getMethod("getFontData").invoke(font);
-            fd[0].getClass().getMethod("setName", String.class).invoke(fd[0], "Monospace");
-            Object disp = st.getMethod("getDisplay").invoke(text);
-            Object f = Class.forName("org.eclipse.swt.graphics.Font")
-                .getConstructor(Class.forName("org.eclipse.swt.widgets.Display"),
-                    Class.forName("org.eclipse.swt.graphics.FontData"))
-                .newInstance(disp, fd[0]);
-            st.getMethod("setFont", Class.forName("org.eclipse.swt.graphics.Font")).invoke(text, f);
+            int height = (int) fd[0].getClass().getMethod("getHeight").invoke(fd[0]);
+            Class<?> fClass = Class.forName("org.eclipse.swt.graphics.Font");
+            Class<?> fdClass = Class.forName("org.eclipse.swt.graphics.FontData");
+            Class<?> dispClass = Class.forName("org.eclipse.swt.widgets.Display");
+            String[] fonts = {"Monospace", "Liberation Mono", "DejaVu Sans Mono",
+                "Courier New", "Courier 10 Pitch", "Bitstream Vera Sans Mono"};
+            for (String name : fonts) {
+                try {
+                    Object newFd = fdClass.getConstructor(String.class, int.class, int.class)
+                        .newInstance(name, height, 0);
+                    Object f = fClass.getConstructor(dispClass, fdClass).newInstance(disp, newFd);
+                    st.getMethod("setFont", fClass).invoke(text, f);
+                    return;
+                } catch (Exception e2) { /* try next font */ }
+            }
         } catch (Exception e) {
-            // ignore
+            System.err.println("[TalonFormatter] setMonospaceFontV2: " + e);
         }
     }
 
