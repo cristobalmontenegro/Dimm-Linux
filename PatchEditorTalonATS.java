@@ -94,7 +94,7 @@ public class PatchEditorTalonATS {
         ClassReader cr = new ClassReader(classBytes);
         ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);
         cr.accept(new ClassVisitor(Opcodes.ASM9, cw) {
-            boolean done = false;
+            boolean hasReadFileContent = false;
 
             @Override
             public FieldVisitor visitField(int access, String name, String desc, String sig, Object value) {
@@ -107,6 +107,10 @@ public class PatchEditorTalonATS {
             @Override
             public MethodVisitor visitMethod(int access, String name, String desc,
                                               String signature, String[] exceptions) {
+                if ("readFileContent".equals(name)
+                    && "(Ljava/io/File;)Ljava/lang/String;".equals(desc)) {
+                    hasReadFileContent = true;
+                }
                 if ("access$0".equals(name)) {
                     String newDesc = "(Lec/gob/sri/dimm/ats/ui/editores/EditorTalonATS;)L" + STYLED_TEXT + ";";
                     MethodVisitor mv = super.visitMethod(access, name, newDesc, signature, exceptions);
@@ -124,8 +128,7 @@ public class PatchEditorTalonATS {
 
             @Override
             public void visitEnd() {
-                if (!done) {
-                    done = true;
+                if (!hasReadFileContent) {
                     MethodVisitor mv = super.visitMethod(
                         Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
                         "readFileContent",
