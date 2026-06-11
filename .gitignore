@@ -14,4 +14,13 @@ DimmDb/
 descargas/
 temp/
 PLUGINSSRI/
+features/
+ats *.xml
+# Plugins SRI (binarios, se descargan del SRI)
+plugins/ec.gob.sri.dimm.ats.*.jar
+plugins/ec.gob.sri.dimm.data*.jar
+plugins/ec.gob.sri.dimm.api*.jar
+plugins/org.eclipse.core.databinding*.jar
+plugins/org.eclipse.jface.databinding*.jar
+plugins/org.eclipse.nebula.*.jar
 # Patch files are tracked (needed by dimm.sh for auto-patch)

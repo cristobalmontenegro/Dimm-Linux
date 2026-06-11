@@ -203,7 +203,7 @@ public class PatchEditorTalonATS {
         @Override
         public void visitIntInsn(int opcode, int operand) {
             if (opcode == Opcodes.SIPUSH && operand == 2048) {
-                super.visitIntInsn(Opcodes.SIPUSH, 776);
+                super.visitIntInsn(Opcodes.SIPUSH, 792);
                 return;
             }
             super.visitIntInsn(opcode, operand);

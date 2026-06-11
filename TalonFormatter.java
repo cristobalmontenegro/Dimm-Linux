@@ -50,7 +50,9 @@ public class TalonFormatter {
                 int te = html.indexOf("</table>", ti);
                 if (te < 0) { result.append(processText(html.substring(ti))); pos = html.length(); break; }
                 te += "</table>".length();
+                result.append('\n');
                 result.append(formatTable(html.substring(ti, te)));
+                result.append('\n');
                 pos = te;
             }
             result.append(processText(html.substring(pos)));
@@ -80,23 +82,62 @@ public class TalonFormatter {
         while (rm.find()) {
             String rc = rm.group(1);
             List<String> cells = new ArrayList<>();
-            Matcher cm = Pattern.compile("(?i)<t[hd][^>]*>(.*?)</t[hd]>").matcher(rc);
+            Matcher cm = Pattern.compile("(?i)<t[hd]([^>]*)>(.*?)</t[hd]>").matcher(rc);
             while (cm.find()) {
-                String raw = cm.group(1).replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
+                String attrs = cm.group(1);
+                String raw = cm.group(2).replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
                 String decoded = decodeEntities(raw);
-                if (!decoded.isEmpty()) cells.add(decoded);
+                int colspan = 1;
+                Matcher colM = Pattern.compile("(?i)colspan\\s*=\\s*\"?(\\d+)\"?").matcher(attrs);
+                if (colM.find()) colspan = Integer.parseInt(colM.group(1));
+                cells.add(decoded);
+                for (int i = 1; i < colspan; i++) cells.add("");
             }
             if (!cells.isEmpty()) rows.add(cells);
         }
         if (rows.isEmpty()) return processText(tableHtml);
 
-        StringBuilder sb = new StringBuilder();
+        int maxCols = 0;
+        for (List<String> r : rows) maxCols = Math.max(maxCols, r.size());
+        int[] widths = new int[maxCols];
         for (List<String> r : rows) {
             for (int c = 0; c < r.size(); c++) {
-                if (c > 0) sb.append(" | ");
-                sb.append(r.get(c));
+                widths[c] = Math.max(widths[c], r.get(c).length());
+            }
+        }
+
+        boolean[] numCol = new boolean[maxCols];
+        Arrays.fill(numCol, true);
+        for (int ri = 1; ri < rows.size(); ri++) {
+            List<String> r = rows.get(ri);
+            for (int c = 0; c < r.size(); c++) {
+                String v = r.get(c);
+                if (!v.isEmpty() && !v.matches("[\\d.,\\-]+")) numCol[c] = false;
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int ri = 0; ri < rows.size(); ri++) {
+            List<String> r = rows.get(ri);
+            for (int c = 0; c < maxCols; c++) {
+                if (c > 0) sb.append("  ");
+                String val = c < r.size() ? r.get(c) : "";
+                if (numCol[c]) {
+                    for (int p = val.length(); p < widths[c]; p++) sb.append(' ');
+                    sb.append(val);
+                } else {
+                    sb.append(val);
+                    for (int p = val.length(); p < widths[c]; p++) sb.append(' ');
+                }
             }
             sb.append('\n');
+            if (ri == 0) {
+                for (int c = 0; c < maxCols; c++) {
+                    if (c > 0) sb.append("  ");
+                    for (int p = 0; p < widths[c]; p++) sb.append('-');
+                }
+                sb.append('\n');
+            }
         }
         return sb.toString();
     }
