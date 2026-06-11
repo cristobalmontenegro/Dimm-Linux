@@ -212,7 +212,7 @@ public class PatchEditorTalonATS {
         public void visitFieldInsn(int opcode, String owner, String name, String desc) {
             if ("brwTalonResumen".equals(name) && (desc.contains("Browser") || desc.contains("StyledText"))) {
                 if (opcode == Opcodes.PUTFIELD) {
-                    mv.visitInsn(Opcodes.DUP);
+                    mv.visitInsn(Opcodes.DUP_X1);
                     super.visitFieldInsn(opcode, owner, name, "L" + STYLED_TEXT + ";");
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC, FORMATTER_OWNER,
                         "setMonospaceFont", "(Ljava/lang/Object;)V", false);
