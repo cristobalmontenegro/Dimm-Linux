@@ -133,7 +133,12 @@ public class TalonFormatter {
         }
 
         int[] widths = new int[maxCols];
-        for (List<String> r : rows) {
+        for (int ri = 0; ri < rows.size(); ri++) {
+            List<String> r = rows.get(ri);
+            int nonEmpty = 0;
+            for (String v : r) if (!v.isEmpty()) nonEmpty++;
+            boolean isSection = nonEmpty <= 1 && r.size() == maxCols;
+            if (isSection) continue;
             for (int c = 0; c < r.size(); c++) {
                 widths[c] = Math.max(widths[c], r.get(c).length());
             }
