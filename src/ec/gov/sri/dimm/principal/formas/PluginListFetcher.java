@@ -22,6 +22,7 @@ public class PluginListFetcher {
         private static String extractVersion(String url) {
             String fn = url.substring(url.lastIndexOf('/') + 1);
             if (fn.endsWith(".zip")) fn = fn.substring(0, fn.length() - 4);
+            fn = fn.replace('_', '.');
             Pattern vp = Pattern.compile("(\\d+\\.\\d+(?:\\.\\d+)*)$");
             Matcher m = vp.matcher(fn);
             if (m.find()) return m.group(1);
@@ -59,15 +60,14 @@ public class PluginListFetcher {
     static List<PluginEntry> parseHtml(String html) {
         List<PluginEntry> result = new ArrayList<>();
         Pattern linkPattern = Pattern.compile(
-            "<a\\s[^>]*href=\"(https://descargas\\.sri\\.gob\\.ec/download/anexos/[^\"]*\\.zip)\"[^>]*title=\"([^\"]*)\"[^>]*>",
+            "<a\\s[^>]*href=\"(https://descargas\\.sri\\.gob\\.ec/download/anexos/[^\"]*\\.zip)\"[^>]*title=\"Descargar ([^\"]*)\"[^>]*>",
             Pattern.CASE_INSENSITIVE);
         Matcher m = linkPattern.matcher(html);
         while (m.find()) {
             String url = m.group(1);
-            String name = m.group(2);
-            if (name.startsWith("Descargar ")) {
-                name = name.substring(10);
-            }
+            String name = m.group(2).trim();
+            if (name.toLowerCase().contains("codificaci\u00f3n de tablas")) continue;
+            if (url.toLowerCase().contains("/catalogo")) continue;
             result.add(new PluginEntry(name, url));
         }
         return result;
