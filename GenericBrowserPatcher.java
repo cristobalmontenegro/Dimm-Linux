@@ -33,7 +33,6 @@ public class GenericBrowserPatcher {
             if (!f.exists()) f = new File(t);
             if (!f.exists() || !f.getName().endsWith(".jar")) continue;
             byte[] data = readFile(f);
-            if (!hasBrowserRef(data)) continue;
             System.out.println("  Scanning " + f.getName());
             byte[] patched = patchJar(data, f);
             if (patched != null) {
@@ -46,11 +45,6 @@ public class GenericBrowserPatcher {
         }
     }
 
-    static boolean hasBrowserRef(byte[] data) {
-        return new String(data, java.nio.charset.StandardCharsets.ISO_8859_1)
-            .contains("org/eclipse/swt/browser/Browser");
-    }
-
     static byte[] patchJar(byte[] jarData, File jarFile) throws Exception {
         Map<String, byte[]> entries = new LinkedHashMap<>();
         boolean patched = false;
@@ -60,7 +54,7 @@ public class GenericBrowserPatcher {
                 String name = ze.getName();
                 byte[] data = readAll(zis);
                 if (name.equals(FORMATTER_PATH)) continue;
-                if (name.endsWith(".class") && hasBrowserRef(data)) {
+                if (name.endsWith(".class") && new String(data, java.nio.charset.StandardCharsets.ISO_8859_1).contains(BROWSER)) {
                     byte[] nd = patchClass(data);
                     if (nd != data) {
                         System.out.println("    Patched: " + name.replace('/', '.'));
